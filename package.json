@@ -3,6 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "rm -rf dist _site site.tar.gz && mkdir -p dist _site && cat chunks/part-*.txt | base64 -d > site.tar.gz && tar -xzf site.tar.gz -C _site && cp -a _site/preview/. dist/ && mkdir -p dist/public && cp -a _site/public/. dist/public/"
+    "build": "rm -rf dist _site site.tar.gz && mkdir -p dist _site && cat chunks/part-*.txt | base64 -d > site.tar.gz && tar -xzf site.tar.gz -C _site && cp -a _site/preview/. dist/ && mkdir -p dist/public && cp -a _site/public/. dist/public/ && find dist -name '*.html' -type f -exec sed -i 's#\\.\\./public/#public/#g' {} +"
   }
 }
