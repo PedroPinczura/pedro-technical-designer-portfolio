@@ -1,0 +1,8 @@
+{
+  "name": "pedro-technical-designer-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rm -rf dist site.tar.gz && mkdir -p dist && cat chunks/part-*.bin > site.tar.gz && tar -xzf site.tar.gz -C dist"
+  }
+}
