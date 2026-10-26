@@ -955,14 +955,19 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 
 /* ===== Recruiter scan emphasis ===== */
 .scan-key{
+  display:inline!important;
   color:inherit!important;
   font-family:inherit!important;
   font-size:inherit!important;
   font-style:inherit!important;
+  font-weight:inherit!important;
   line-height:inherit!important;
   letter-spacing:inherit!important;
   text-transform:inherit!important;
-  font-weight:700!important;
+  vertical-align:baseline!important;
+  white-space:inherit!important;
+  -webkit-text-stroke:.18px currentColor;
+  text-shadow:0 0 .18px currentColor;
 }
 ''', encoding="utf-8")
 
