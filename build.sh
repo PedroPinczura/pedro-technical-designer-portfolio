@@ -795,24 +795,36 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 # ===== Recruiter scan emphasis pass =====
 # Add restrained emphasis inside paragraphs so recruiters can scan role, technology,
 # ownership, systems and production scope without turning the page into bold noise.
-def emphasize_paragraphs(path, phrases):
+def emphasize_paragraphs(path, phrases, max_per_paragraph=3):
     p = Path(path)
     html = p.read_text(encoding="utf-8")
-    ordered = sorted(dict.fromkeys(phrases), key=len, reverse=True)
+    ordered = list(dict.fromkeys(phrases))
 
     def transform(match):
-        body = match.group(1)
+        attrs = match.group(1) or ""
+        body = match.group(2)
         tokens = []
+
         for phrase in ordered:
-            if phrase in body:
+            if len(tokens) >= max_per_paragraph:
+                break
+
+            escaped = re.escape(phrase)
+            prefix = r"(?<![A-Za-z0-9])" if phrase[:1].isalnum() else ""
+            suffix = r"(?![A-Za-z0-9])" if phrase[-1:].isalnum() else ""
+            pattern = prefix + escaped + suffix
+
+            if re.search(pattern, body):
                 token = f"__SCANKEY_{len(tokens)}__"
-                body = body.replace(phrase, token, 1)
+                body = re.sub(pattern, token, body, count=1)
                 tokens.append((token, phrase))
+
         for token, phrase in tokens:
             body = body.replace(token, f'<strong class="scan-key">{phrase}</strong>')
-        return "<p>" + body + "</p>"
 
-    html = re.sub(r"<p>([\s\S]*?)</p>", transform, html)
+        return f"<p{attrs}>{body}</p>"
+
+    html = re.sub(r"<p([^>]*)>([\s\S]*?)</p>", transform, html)
     p.write_text(html, encoding="utf-8")
 
 emphasis = {
