@@ -643,22 +643,22 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 replace(
     "dist/index.html",
     '<a class="showcase-tile showcase-main" href="paperly.html">',
-    '<a class="showcase-tile showcase-main" href="paperly.html" style="--showcase-bg:url(\\'public/media/paperly/cover-portfolio.webp\\')">'
+    '<a class="showcase-tile showcase-main showcase-paperly" href="paperly.html">'
 )
 replace(
     "dist/index.html",
     '<a class="showcase-tile" href="nba-bounce.html">',
-    '<a class="showcase-tile" href="nba-bounce.html" style="--showcase-bg:url(\\'public/media/credits/nba-bounce/cover.webp\\')">'
+    '<a class="showcase-tile showcase-nba" href="nba-bounce.html">'
 )
 replace(
     "dist/index.html",
     '<a class="showcase-tile" href="bandit-trail.html">',
-    '<a class="showcase-tile" href="bandit-trail.html" style="--showcase-bg:url(\\'public/media/bandit-trail/cover.webp\\')">'
+    '<a class="showcase-tile showcase-bandit" href="bandit-trail.html">'
 )
 replace(
     "dist/index.html",
     '<a class="showcase-tile showcase-wide" href="kids-table.html">',
-    '<a class="showcase-tile showcase-wide" href="kids-table.html" style="--showcase-bg:url(\\'public/media/kids-table/cover.webp\\')">'
+    '<a class="showcase-tile showcase-wide showcase-kids" href="kids-table.html">'
 )
 
 css = Path("dist/style.css")
@@ -691,13 +691,16 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   position:absolute;
   z-index:0;
   inset:-16px;
-  background-image:var(--showcase-bg);
   background-size:cover;
   background-position:center;
   filter:blur(20px) brightness(.38) saturate(.82);
   transform:scale(1.12);
   opacity:.95;
 }
+.showcase-paperly::before{background-image:url("public/media/paperly/cover-portfolio.webp")}
+.showcase-nba::before{background-image:url("public/media/credits/nba-bounce/cover.webp")}
+.showcase-bandit::before{background-image:url("public/media/bandit-trail/cover.webp")}
+.showcase-kids::before{background-image:url("public/media/kids-table/cover.webp")}
 .showcase-tile::after{
   content:"";
   position:absolute;
@@ -788,5 +791,4 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   }
 }
 ''', encoding="utf-8")
-
 PY
