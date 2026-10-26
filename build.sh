@@ -795,7 +795,7 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 # ===== Recruiter scan emphasis pass =====
 # Add restrained emphasis inside paragraphs so recruiters can scan role, technology,
 # ownership, systems and production scope without turning the page into bold noise.
-def emphasize_paragraphs(path, phrases, max_per_paragraph=3):
+def emphasize_paragraphs(path, phrases):
     p = Path(path)
     html = p.read_text(encoding="utf-8")
     ordered = list(dict.fromkeys(phrases))
@@ -806,9 +806,6 @@ def emphasize_paragraphs(path, phrases, max_per_paragraph=3):
         tokens = []
 
         for phrase in ordered:
-            if len(tokens) >= max_per_paragraph:
-                break
-
             escaped = re.escape(phrase)
             prefix = r"(?<![A-Za-z0-9])" if phrase[:1].isalnum() else ""
             suffix = r"(?![A-Za-z0-9])" if phrase[-1:].isalnum() else ""
@@ -958,12 +955,14 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 
 /* ===== Recruiter scan emphasis ===== */
 .scan-key{
-  color:#edf4ff;
-  font-weight:700;
-}
-.pp-codefoot .scan-key,
-figcaption .scan-key{
-  color:inherit;
+  color:inherit!important;
+  font-family:inherit!important;
+  font-size:inherit!important;
+  font-style:inherit!important;
+  line-height:inherit!important;
+  letter-spacing:inherit!important;
+  text-transform:inherit!important;
+  font-weight:700!important;
 }
 ''', encoding="utf-8")
 
