@@ -637,4 +637,156 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+# ===== Home hero media pass =====
+# The hero uses four landscape covers; preserve each full composition instead of cropping it.
+replace(
+    "dist/index.html",
+    '<a class="showcase-tile showcase-main" href="paperly.html">',
+    '<a class="showcase-tile showcase-main" href="paperly.html" style="--showcase-bg:url(\\'public/media/paperly/cover-portfolio.webp\\')">'
+)
+replace(
+    "dist/index.html",
+    '<a class="showcase-tile" href="nba-bounce.html">',
+    '<a class="showcase-tile" href="nba-bounce.html" style="--showcase-bg:url(\\'public/media/credits/nba-bounce/cover.webp\\')">'
+)
+replace(
+    "dist/index.html",
+    '<a class="showcase-tile" href="bandit-trail.html">',
+    '<a class="showcase-tile" href="bandit-trail.html" style="--showcase-bg:url(\\'public/media/bandit-trail/cover.webp\\')">'
+)
+replace(
+    "dist/index.html",
+    '<a class="showcase-tile showcase-wide" href="kids-table.html">',
+    '<a class="showcase-tile showcase-wide" href="kids-table.html" style="--showcase-bg:url(\\'public/media/kids-table/cover.webp\\')">'
+)
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== Home hero media pass ===== */
+.recruiter-showcase{
+  min-height:min(62vh,580px)!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  padding:10px!important;
+}
+.showcase-main,
+.showcase-wide{
+  grid-row:auto!important;
+  grid-column:auto!important;
+}
+.showcase-tile{
+  position:relative;
+  isolation:isolate;
+  display:grid!important;
+  grid-template-rows:minmax(0,1fr) auto;
+  min-height:0;
+  overflow:hidden;
+  background:#080c11!important;
+}
+.showcase-tile::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:-16px;
+  background-image:var(--showcase-bg);
+  background-size:cover;
+  background-position:center;
+  filter:blur(20px) brightness(.38) saturate(.82);
+  transform:scale(1.12);
+  opacity:.95;
+}
+.showcase-tile::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:0;
+  background:linear-gradient(180deg,rgba(6,9,13,.04),rgba(6,9,13,.18));
+  pointer-events:none;
+}
+.showcase-tile img{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%!important;
+  height:100%!important;
+  min-width:0;
+  min-height:0;
+  padding:8px;
+  object-fit:contain!important;
+  object-position:center!important;
+  transform:none!important;
+  filter:none!important;
+}
+.showcase-tile:hover img,
+.showcase-tile:focus-visible img{
+  transform:scale(1.012)!important;
+  filter:brightness(1.04)!important;
+}
+.showcase-tile .tile-shade{
+  display:none!important;
+}
+.showcase-tile .tile-copy{
+  position:relative!important;
+  z-index:2;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  grid-row:2;
+  padding:10px 12px 12px;
+  border-top:1px solid rgba(255,255,255,.09);
+  background:rgba(7,10,15,.91);
+  backdrop-filter:blur(8px);
+}
+.showcase-tile .tile-copy small{
+  font-size:8px;
+}
+.showcase-tile .tile-copy strong{
+  font-size:clamp(16px,1.45vw,22px);
+}
+.showcase-label{
+  top:20px!important;
+  right:20px!important;
+  left:auto!important;
+  pointer-events:none;
+}
+
+@media(max-width:1100px){
+  .recruiter-showcase{
+    min-height:540px!important;
+  }
+}
+@media(max-width:720px){
+  .recruiter-showcase{
+    min-height:460px!important;
+    gap:8px!important;
+    padding:8px!important;
+  }
+  .showcase-tile img{
+    padding:5px;
+  }
+  .showcase-tile .tile-copy{
+    padding:8px 9px 9px;
+  }
+  .showcase-tile .tile-copy small{
+    font-size:7px;
+  }
+  .showcase-tile .tile-copy strong{
+    font-size:15px;
+  }
+  .showcase-label{
+    top:14px!important;
+    right:14px!important;
+    font-size:7px!important;
+  }
+}
+@media(max-width:430px){
+  .recruiter-showcase{
+    min-height:430px!important;
+  }
+}
+''', encoding="utf-8")
+
 PY
