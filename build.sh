@@ -971,4 +971,401 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+# ===== Steam-style portfolio galleries =====
+from html import escape as html_escape
+
+def _attr(tag, name):
+    m = re.search(rf'{re.escape(name)}="([^"]*)"', tag)
+    return m.group(1) if m else ""
+
+def _steam_markup(items):
+    if not items:
+        return ""
+    thumbs = []
+    for i, item in enumerate(items):
+        selected = " is-active" if i == 0 else ""
+        thumbs.append(
+            f'<button type="button" class="steam-thumb{selected}" data-index="{i}" '
+            f'aria-label="Show image {i+1} of {len(items)}">'
+            f'<img src="{html_escape(item["src"], quote=True)}" '
+            f'alt="{html_escape(item["alt"], quote=True)}"></button>'
+        )
+    data = []
+    for item in items:
+        data.append(
+            '<span class="steam-data" '
+            f'data-src="{html_escape(item["src"], quote=True)}" '
+            f'data-alt="{html_escape(item["alt"], quote=True)}" '
+            f'data-caption="{html_escape(item["caption"], quote=True)}"></span>'
+        )
+    first = items[0]
+    return f'''
+<div class="steam-gallery" data-steam-gallery>
+  <div class="steam-stage">
+    <button type="button" class="steam-nav steam-prev" aria-label="Previous image">‹</button>
+    <button type="button" class="steam-main" aria-label="Open image at full size">
+      <img src="{html_escape(first["src"], quote=True)}" alt="{html_escape(first["alt"], quote=True)}">
+    </button>
+    <button type="button" class="steam-nav steam-next" aria-label="Next image">›</button>
+  </div>
+  <div class="steam-meta">
+    <p class="steam-caption">{html_escape(first["caption"])}</p>
+    <span class="steam-count">1 / {len(items)}</span>
+  </div>
+  <div class="steam-thumbs" aria-label="Gallery thumbnails">
+    {''.join(thumbs)}
+  </div>
+  <div class="steam-dataset" hidden>{''.join(data)}</div>
+</div>'''
+
+def _extract_button_items(block):
+    items = []
+    for bm in re.finditer(r'<button\b[^>]*>[\s\S]*?</button>', block):
+        button = bm.group(0)
+        om = re.match(r'<button\b[^>]*>', button)
+        im = re.search(r'<img\b[^>]*>', button)
+        if not om or not im:
+            continue
+        open_tag = om.group(0)
+        img_tag = im.group(0)
+        src = _attr(open_tag, "data-src") or _attr(img_tag, "src")
+        alt = _attr(img_tag, "alt")
+        caption = _attr(open_tag, "data-caption") or alt
+        if src:
+            items.append({"src":src, "alt":alt, "caption":caption})
+    return items
+
+def _extract_figure_items(block):
+    items = []
+    for fm in re.finditer(r'<figure\b[^>]*>[\s\S]*?</figure>', block):
+        fig = fm.group(0)
+        im = re.search(r'<img\b[^>]*>', fig)
+        if not im:
+            continue
+        img_tag = im.group(0)
+        src = _attr(img_tag, "src")
+        alt = _attr(img_tag, "alt")
+        cm = re.search(r'<figcaption>([\s\S]*?)</figcaption>', fig)
+        caption = re.sub(r'<[^>]+>', '', cm.group(1)).strip() if cm else alt
+        if src:
+            items.append({"src":src, "alt":alt, "caption":caption})
+    return items
+
+def transform_credit_gallery(path):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    pattern = re.compile(r'(<div class="ghead">[\s\S]*?</div>)<div class="gallery">([\s\S]*?)</div></div></section>')
+    m = pattern.search(html)
+    if not m:
+        raise SystemExit(f"Credit gallery not found in {path}")
+    items = _extract_button_items(m.group(2))
+    replacement = m.group(1) + _steam_markup(items) + '</div></section>'
+    html = html[:m.start()] + replacement + html[m.end():]
+    p.write_text(html, encoding="utf-8")
+
+def transform_bandit_gallery(path):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    pattern = re.compile(r'(<section class="c gallerysec bt-gallery"><div class="galleryhead">[\s\S]*?</div>)<div class="gallerygrid">([\s\S]*?)</div></section>')
+    m = pattern.search(html)
+    if not m:
+        raise SystemExit(f"Bandit gallery not found in {path}")
+    items = _extract_button_items(m.group(2))
+    replacement = m.group(1) + _steam_markup(items) + '</section>'
+    html = html[:m.start()] + replacement + html[m.end():]
+    p.write_text(html, encoding="utf-8")
+
+def transform_kids_gallery(path):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    pattern = re.compile(r'(<section class="c gallerysec"><div class="galleryhead">[\s\S]*?</div>)<div class="gallerygrid">([\s\S]*?)</div></section>')
+    m = pattern.search(html)
+    if not m:
+        raise SystemExit(f"KIDS TABLE gallery not found in {path}")
+    items = _extract_figure_items(m.group(2))
+    replacement = m.group(1) + _steam_markup(items) + '</section>'
+    html = html[:m.start()] + replacement + html[m.end():]
+    p.write_text(html, encoding="utf-8")
+
+transform_bandit_gallery("dist/bandit-trail.html")
+transform_kids_gallery("dist/kids-table.html")
+for gallery_page in [
+    "dist/nba-bounce.html",
+    "dist/barbie-horse-trails.html",
+    "dist/dayz.html",
+    "dist/chicken-run-eggstraction.html",
+    "dist/the-cat-in-the-hat-rainy-day-mayhem.html",
+]:
+    transform_credit_gallery(gallery_page)
+
+steam_dialog = '''
+<dialog class="steam-lightbox" id="steam-lightbox">
+  <button type="button" class="steam-lightbox-close" aria-label="Close image preview">×</button>
+  <img src="" alt="">
+  <p></p>
+</dialog>
+'''
+
+steam_script = r'''
+<script>
+(()=>{
+  const galleries=[...document.querySelectorAll('[data-steam-gallery]')];
+  if(!galleries.length)return;
+
+  let lightbox=document.getElementById('steam-lightbox');
+  if(!lightbox){
+    document.body.insertAdjacentHTML('beforeend','<dialog class="steam-lightbox" id="steam-lightbox"><button type="button" class="steam-lightbox-close" aria-label="Close image preview">×</button><img src="" alt=""><p></p></dialog>');
+    lightbox=document.getElementById('steam-lightbox');
+  }
+  const lbImg=lightbox.querySelector('img');
+  const lbCap=lightbox.querySelector('p');
+
+  galleries.forEach(gallery=>{
+    const data=[...gallery.querySelectorAll('.steam-data')].map(el=>({
+      src:el.dataset.src||'',
+      alt:el.dataset.alt||'',
+      caption:el.dataset.caption||''
+    }));
+    const main=gallery.querySelector('.steam-main img');
+    const caption=gallery.querySelector('.steam-caption');
+    const count=gallery.querySelector('.steam-count');
+    const thumbs=[...gallery.querySelectorAll('.steam-thumb')];
+    let current=0;
+
+    const show=(index,scrollThumb=true)=>{
+      current=(index+data.length)%data.length;
+      const item=data[current];
+      main.src=item.src;
+      main.alt=item.alt;
+      caption.textContent=item.caption;
+      count.textContent=(current+1)+' / '+data.length;
+      thumbs.forEach((thumb,i)=>{
+        const active=i===current;
+        thumb.classList.toggle('is-active',active);
+        thumb.setAttribute('aria-current',active?'true':'false');
+      });
+      if(scrollThumb) thumbs[current]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    };
+
+    gallery.querySelector('.steam-prev')?.addEventListener('click',()=>show(current-1));
+    gallery.querySelector('.steam-next')?.addEventListener('click',()=>show(current+1));
+    thumbs.forEach((thumb,i)=>thumb.addEventListener('click',()=>show(i,false)));
+
+    gallery.querySelector('.steam-main')?.addEventListener('click',()=>{
+      const item=data[current];
+      lbImg.src=item.src;
+      lbImg.alt=item.alt;
+      lbCap.textContent=item.caption;
+      lightbox.showModal();
+    });
+
+    gallery.addEventListener('keydown',e=>{
+      if(e.key==='ArrowLeft'){e.preventDefault();show(current-1)}
+      if(e.key==='ArrowRight'){e.preventDefault();show(current+1)}
+    });
+
+    let touchStartX=0;
+    const stage=gallery.querySelector('.steam-stage');
+    stage?.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].clientX},{passive:true});
+    stage?.addEventListener('touchend',e=>{
+      const dx=e.changedTouches[0].clientX-touchStartX;
+      if(Math.abs(dx)>45) show(dx<0?current+1:current-1);
+    },{passive:true});
+  });
+
+  lightbox.querySelector('.steam-lightbox-close')?.addEventListener('click',()=>lightbox.close());
+  lightbox.addEventListener('click',e=>{if(e.target===lightbox)lightbox.close()});
+})();
+</script>
+'''
+
+for gallery_page in [
+    "dist/bandit-trail.html",
+    "dist/kids-table.html",
+    "dist/nba-bounce.html",
+    "dist/barbie-horse-trails.html",
+    "dist/dayz.html",
+    "dist/chicken-run-eggstraction.html",
+    "dist/the-cat-in-the-hat-rainy-day-mayhem.html",
+]:
+    p = Path(gallery_page)
+    html = p.read_text(encoding="utf-8")
+    if 'id="steam-lightbox"' not in html:
+        html = html.replace("</main>", steam_dialog + "</main>")
+    html = html.replace("</body>", steam_script + "</body>")
+    p.write_text(html, encoding="utf-8")
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== Steam-style portfolio galleries ===== */
+.steam-gallery{margin-top:30px}
+.steam-stage{
+  position:relative;
+  display:grid;
+  place-items:center;
+  min-height:clamp(360px,52vw,720px);
+  overflow:hidden;
+  border:1px solid var(--l);
+  background:radial-gradient(circle at 50% 44%,rgba(47,128,255,.08),transparent 50%),#070a0e;
+}
+.steam-main{
+  width:100%;
+  height:100%;
+  min-height:inherit;
+  padding:0;
+  border:0;
+  display:grid;
+  place-items:center;
+  background:transparent;
+  cursor:zoom-in;
+}
+.steam-main img{
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:720px;
+  object-fit:contain;
+  object-position:center;
+}
+.steam-nav{
+  position:absolute;
+  top:50%;
+  z-index:3;
+  width:50px;
+  height:74px;
+  margin-top:-37px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(5,8,12,.72);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:42px;
+  font-weight:300;
+  line-height:1;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+  transition:background .2s,border-color .2s,transform .2s;
+}
+.steam-nav:hover,.steam-nav:focus-visible{
+  background:rgba(47,128,255,.82);
+  border-color:rgba(105,168,255,.8);
+}
+.steam-prev{left:14px}
+.steam-next{right:14px}
+.steam-meta{
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:11px 2px 10px;
+}
+.steam-caption{
+  margin:0!important;
+  color:#9ba7b6;
+  font-size:12px!important;
+  line-height:1.45!important;
+}
+.steam-count{
+  flex:0 0 auto;
+  color:#718092;
+  font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+}
+.steam-thumbs{
+  display:grid;
+  grid-auto-flow:column;
+  grid-auto-columns:minmax(132px,1fr);
+  gap:9px;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+  scrollbar-width:thin;
+  padding:0 0 8px;
+  scroll-snap-type:x proximity;
+}
+.steam-thumb{
+  position:relative;
+  aspect-ratio:16/9;
+  padding:3px;
+  border:1px solid var(--l);
+  background:#090d12;
+  opacity:.62;
+  cursor:pointer;
+  overflow:hidden;
+  scroll-snap-align:center;
+  transition:opacity .2s,border-color .2s,box-shadow .2s,transform .2s;
+}
+.steam-thumb img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.steam-thumb:hover{opacity:.9}
+.steam-thumb.is-active{
+  opacity:1;
+  border-color:var(--b2);
+  box-shadow:inset 0 0 0 1px var(--b2),0 0 0 1px rgba(105,168,255,.15);
+}
+.steam-thumb.is-active::after{
+  content:"";
+  position:absolute;
+  left:8px;
+  right:8px;
+  bottom:0;
+  height:2px;
+  background:var(--b2);
+}
+.steam-lightbox{
+  width:min(94vw,1500px);
+  max-width:none;
+  max-height:94vh;
+  padding:0;
+  border:1px solid rgba(255,255,255,.16);
+  background:#05070a;
+  color:#fff;
+  box-shadow:0 32px 110px rgba(0,0,0,.75);
+}
+.steam-lightbox::backdrop{
+  background:rgba(2,4,7,.9);
+  backdrop-filter:blur(8px);
+}
+.steam-lightbox img{
+  display:block;
+  width:100%;
+  max-height:84vh;
+  object-fit:contain;
+}
+.steam-lightbox p{
+  margin:0!important;
+  padding:12px 16px 14px;
+  border-top:1px solid var(--l);
+  color:#9da8b7;
+  font-size:12px!important;
+}
+.steam-lightbox-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:4;
+  width:40px;
+  height:40px;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(5,8,12,.82);
+  color:#fff;
+  font-size:25px;
+  cursor:pointer;
+}
+@media(max-width:760px){
+  .steam-stage{min-height:clamp(240px,68vw,430px)}
+  .steam-nav{width:40px;height:58px;margin-top:-29px;font-size:34px}
+  .steam-prev{left:7px}
+  .steam-next{right:7px}
+  .steam-thumbs{grid-auto-columns:112px;gap:7px}
+  .steam-meta{align-items:flex-start}
+}
+''', encoding="utf-8")
+
 PY
