@@ -791,4 +791,168 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   }
 }
 ''', encoding="utf-8")
+
+# ===== Recruiter scan emphasis pass =====
+# Add restrained emphasis inside paragraphs so recruiters can scan role, technology,
+# ownership, systems and production scope without turning the page into bold noise.
+def emphasize_paragraphs(path, phrases):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    ordered = sorted(dict.fromkeys(phrases), key=len, reverse=True)
+
+    def transform(match):
+        body = match.group(1)
+        tokens = []
+        for phrase in ordered:
+            if phrase in body:
+                token = f"__SCANKEY_{len(tokens)}__"
+                body = body.replace(phrase, token, 1)
+                tokens.append((token, phrase))
+        for token, phrase in tokens:
+            body = body.replace(token, f'<strong class="scan-key">{phrase}</strong>')
+        return "<p>" + body + "</p>"
+
+    html = re.sub(r"<p>([\s\S]*?)</p>", transform, html)
+    p.write_text(html, encoding="utf-8")
+
+emphasis = {
+    "dist/index.html": [
+        "Technical Designer", "Unity / C#", "Unreal / Blueprints", "Functional QA",
+        "gameplay systems", "commercial production", "Technical Design",
+        "end-to-end development", "commercial QA", "Custom flight model",
+        "touch steering", "environmental boosts", "progression",
+        "Design, C# implementation", "coordination",
+        "Full-cycle, multi-platform Functional QA", "licensed-content validation",
+        "direct studio communication in English", "concept to public release",
+        "player feedback", "technical design", "gameplay implementation",
+        "technical experiments", "contribution scope", "Technical Design profile",
+        "Game Design", "Gameplay Programming", "Unity / Unreal development",
+        "entry-level Production"
+    ],
+    "dist/work.html": [
+        "gameplay", "implementation", "iteration", "production",
+        "Design, development, playtesting and iteration",
+        "Technical Design, implementation and coordination",
+        "Custom flight model", "touch steering", "vortices", "upgrades",
+        "full case study coming soon"
+    ],
+    "dist/credits.html": [
+        "Professional game credits", "clear contribution scopes",
+        "tested, validated or contributed"
+    ],
+    "dist/about.html": [
+        "Technical Designer", "game design", "gameplay programming", "functional QA",
+        "Technical Design", "Game Design", "Gameplay Programming",
+        "Unity / Unreal development", "entry-level Production",
+        "meaningful parameters for iteration", "design intent into working systems",
+        "tuned, tested, documented and maintained", "iteration and playtesting",
+        "Unity / C#", "Unreal Engine / Blueprints", "Functional testing",
+        "bug analysis", "design feedback", "technical implementation",
+        "player should experience", "iterated quickly", "Multi-platform functional QA",
+        "gameplay / UX feedback", "Design and implementation",
+        "technical documentation", "Functional QA in English",
+        "weapons, equipment, items", "UE4 endless runner",
+        "public demos", "player feedback", "Production"
+    ],
+    "dist/contact.html": [
+        "Technical Design", "Game Design", "Gameplay Programming",
+        "design, programming and QA", "Production",
+        "email or LinkedIn"
+    ],
+    "dist/paperly.html": [
+        "mobile arcade flight prototype", "launch timing", "custom flight tuning",
+        "touch steering", "environmental boosts", "progression",
+        "skill-based", "intentionally tunable", "underlying flight model",
+        "custom gravity", "progressive speed", "terminal descent",
+        "dead zone", "normalized distance", "smoothing",
+        "fall compensation", "gravity penalty", "Power, Glide and Control upgrades",
+        "dynamic FOV", "design logic", "serialized parameters",
+        "iteration visible and fast", "normalized value", "game state and cooldown",
+        "LateUpdate", "Rigidbody", "Visual pitch and roll",
+        "run-level gravity penalty", "timed warning", "vertical mobile viewport",
+        "native portrait composition", "implementation context",
+        "one repeatable mobile loop"
+    ],
+    "dist/bandit-trail.html": [
+        "infinite runner / shooter", "free movement", "combat", "enemy encounters",
+        "changing environments", "public release", "player-driven iteration",
+        "more agency", "infinite-runner formula", "same goal",
+        "Ranged combat", "Armed enemies", "procedurally generated maps",
+        "unlockable weapons and character skins", "design, implementation, integration, testing and iteration",
+        "free playable builds", "external players", "user-driven iteration",
+        "publicly downloadable", "verifiable record", "created from zero",
+        "publicly playable release"
+    ],
+    "dist/kids-table.html": [
+        "Technical Design", "Lead Programming", "educational mini-games",
+        "interactive systems", "Unity / C#", "more than 150 educational applications",
+        "hands-on C# programming", "technical decisions", "coordination with external programmers",
+        "approximately 90% of the mini-games", "initial concept through implementation and final delivery",
+        "design intent and implementation", "target hardware", "ready to ship"
+    ],
+    "dist/rpg-systems.html": [
+        "personal Unity project", "combat", "inventory", "dialogue", "quests",
+        "shops", "abilities", "player progression loop", "full case study",
+        "implementation details"
+    ],
+    "dist/survival-systems.html": [
+        "survival prototype", "player needs", "inventory", "resource gathering",
+        "crafting", "base building", "NPC combat", "save/load systems",
+        "NPC AI", "persistence", "full case study", "implementation details"
+    ],
+    "dist/nba-bounce.html": [
+        "Full-cycle functional QA", "console and PC builds", "cross-platform regression",
+        "bug reporting and verification", "licensed-content validation",
+        "gameplay/design feedback", "full production cycle",
+        "reproducing and classifying issues", "validating fixes",
+        "Nintendo Switch, PlayStation 5 and Steam", "functional QA",
+        "gameplay-focused observations", "edge cases", "animation flow",
+        "shot behaviour", "sprint speed", "shot-meter timing",
+        "aerial catch-to-dunk sequence"
+    ],
+    "dist/barbie-horse-trails.html": [
+        "Full-cycle functional QA", "console and PC builds", "cross-platform regression",
+        "bug reporting and verification", "gameplay and UX feedback",
+        "interface clarity", "world navigation", "mission progression",
+        "full production cycle", "US-based development studio in English",
+        "Nintendo Switch, PlayStation 5 and Steam", "functional QA",
+        "UX and gameplay feedback", "backtracking", "shortcuts, teleports and fast-travel"
+    ],
+    "dist/dayz.html": [
+        "PC / Steam functional QA", "weapons, equipment and items",
+        "balance and behaviour validation", "dedicated combat test environment",
+        "functional validation", "weapon behaviour and balance",
+        "animation and traversal coverage", "Steam build", "dedicated scenario"
+    ],
+    "dist/chicken-run-eggstraction.html": [
+        "functional QA support", "Steam, Nintendo Switch and PlayStation 5",
+        "characters, missions, unlocks, items and progression",
+        "pure functional QA", "practical trial-and-error testing",
+        "targeted QA contribution", "additional functional coverage"
+    ],
+    "dist/the-cat-in-the-hat-rainy-day-mayhem.html": [
+        "Targeted Functional QA", "PC / Steam build", "early beta phase",
+        "newly integrated content", "new-content validation",
+        "reproducing functional issues", "early-beta QA contribution",
+        "beta builds", "content was continuing to be integrated"
+    ],
+}
+
+for page, phrases in emphasis.items():
+    emphasize_paragraphs(page, phrases)
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== Recruiter scan emphasis ===== */
+.scan-key{
+  color:#edf4ff;
+  font-weight:700;
+}
+.pp-codefoot .scan-key,
+figcaption .scan-key{
+  color:inherit;
+}
+''', encoding="utf-8")
+
 PY
