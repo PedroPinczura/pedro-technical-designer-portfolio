@@ -14,6 +14,12 @@ cp -a _site/public/. dist/public/
 # Portfolio-specific PAPERly cover generated for the horizontal presentation.
 base64 -d assets/paperly-cover-portfolio.webp.b64 > dist/public/media/paperly/cover-portfolio.webp
 
+# PAPERly launch feedback states.
+base64 -d assets/paperly-launch-perfect.png.b64 > dist/public/media/paperly/launch-perfect.png
+base64 -d assets/paperly-launch-good.png.b64 > dist/public/media/paperly/launch-good.png
+base64 -d assets/paperly-launch-ok.png.b64 > dist/public/media/paperly/launch-ok.png
+base64 -d assets/paperly-launch-low-power.png.b64 > dist/public/media/paperly/launch-low-power.png
+
 find dist -name '*.html' -type f -exec sed -i 's#\.\./public/#public/#g' {} +
 
 python3 - <<'PY'
@@ -405,4 +411,230 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   .pp-mobile-shot figcaption{font-size:11px}
 }
 ''', encoding="utf-8")
+
+# ===== PAPERly alignment pass =====
+# Keep the first four gameplay systems as one clean, aligned portrait row.
+replace(
+    "dist/paperly.html",
+    'class="pp-system pp-system-portrait pp-system-feature"',
+    'class="pp-system pp-system-portrait"'
+)
+replace(
+    "dist/paperly.html",
+    'class="pp-system wide pp-system-landscape"',
+    'class="pp-system pp-system-landscape"'
+)
+
+# Four real launch-feedback states, aligned as one comparable set.
+replace(
+    "dist/paperly.html",
+    '<div class="pp-launchvisual"><img src="public/media/paperly/launch-feedback.webp" alt="PAPERly launch timing feedback states"></div>',
+    '''<div class="pp-launchvisual pp-feedback-visual">
+      <div class="pp-feedback-grid">
+        <figure class="pp-feedback-state"><img src="public/media/paperly/launch-perfect.png" alt="PAPERly PERFECT launch feedback"><figcaption>PERFECT</figcaption></figure>
+        <figure class="pp-feedback-state"><img src="public/media/paperly/launch-good.png" alt="PAPERly GOOD launch feedback"><figcaption>GOOD</figcaption></figure>
+        <figure class="pp-feedback-state"><img src="public/media/paperly/launch-ok.png" alt="PAPERly OK launch feedback"><figcaption>OK</figcaption></figure>
+        <figure class="pp-feedback-state"><img src="public/media/paperly/launch-low-power.png" alt="PAPERly LOW POWER launch feedback"><figcaption>LOW POWER</figcaption></figure>
+      </div>
+    </div>'''
+)
+
+# The three implementation-context images should read as one aligned row.
+replace(
+    "dist/paperly.html",
+    'class="pp-editor-shot pp-editor-wide"',
+    'class="pp-editor-shot"'
+)
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== PAPERly alignment pass ===== */
+
+/* Systems: four equal mobile cards, then one deliberate full-width technical card. */
+.pp-systemgrid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:14px!important;
+  align-items:stretch;
+}
+.pp-system.pp-system-portrait{
+  display:flex!important;
+  flex-direction:column;
+  min-height:0!important;
+  grid-column:auto!important;
+  background:#0d1219;
+}
+.pp-system.pp-system-portrait>img{
+  position:relative!important;
+  inset:auto!important;
+  display:block;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:560/1254;
+  object-fit:cover!important;
+  object-position:center!important;
+  border-right:0!important;
+  border-bottom:1px solid var(--l);
+  transform:none!important;
+}
+.pp-system.pp-system-portrait .pp-systemshade{display:none!important}
+.pp-system.pp-system-portrait>div:last-child{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  display:block!important;
+  flex:1;
+  padding:22px 20px 24px!important;
+  background:
+    radial-gradient(circle at 92% 8%,rgba(47,128,255,.1),transparent 30%),
+    linear-gradient(145deg,#111822,#0d1219);
+}
+.pp-system.pp-system-portrait h3{
+  font-size:clamp(25px,2.25vw,36px)!important;
+  line-height:.92;
+}
+.pp-system.pp-system-portrait p{
+  font-size:13px;
+  line-height:1.55;
+}
+.pp-system.pp-system-portrait .pp-sysnum{
+  top:14px!important;
+  right:14px!important;
+}
+
+.pp-system.pp-system-landscape{
+  grid-column:1/-1!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);
+  align-items:stretch;
+}
+.pp-system.pp-system-landscape>img{
+  position:relative!important;
+  inset:auto!important;
+  display:block;
+  width:100%!important;
+  height:100%!important;
+  min-height:400px;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:none!important;
+}
+.pp-system.pp-system-landscape .pp-systemshade{display:none!important}
+.pp-system.pp-system-landscape>div:last-child{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  max-width:none!important;
+  padding:38px!important;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  border-left:1px solid var(--l);
+  background:
+    radial-gradient(circle at 92% 8%,rgba(47,128,255,.12),transparent 30%),
+    linear-gradient(145deg,#111822,#0d1219);
+}
+.pp-system.pp-system-landscape h3{
+  font-size:clamp(34px,4vw,56px)!important;
+}
+
+/* Timing: PERFECT / GOOD / OK / LOW POWER as four equal states. */
+.pp-feedback-visual{
+  padding:22px;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(47,128,255,.08),transparent 55%),
+    #090d12;
+}
+.pp-feedback-grid{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  align-items:start;
+}
+.pp-feedback-state{
+  margin:0;
+  min-width:0;
+}
+.pp-feedback-state img{
+  display:block;
+  width:100%;
+  height:auto!important;
+  aspect-ratio:110/355;
+  object-fit:cover!important;
+  object-position:center;
+  border:1px solid var(--l);
+  background:#0b1016;
+}
+.pp-feedback-state figcaption{
+  padding:9px 2px 0;
+  text-align:center;
+  color:#8f9aa9;
+  font:10px ui-monospace;
+  letter-spacing:.08em;
+}
+
+/* Game View / Scene View: three equal cards on one row. */
+.pp-editorgrid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:14px!important;
+  align-items:stretch!important;
+}
+.pp-editor-shot{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height:100%;
+}
+.pp-editor-shot .pp-galleryopen{
+  aspect-ratio:1/1;
+  display:grid;
+  place-items:center;
+  padding:8px;
+  background:#070a0e;
+}
+.pp-editor-shot .pp-galleryopen img{
+  width:100%!important;
+  height:100%!important;
+  aspect-ratio:auto!important;
+  object-fit:contain!important;
+}
+.pp-editor-shot figcaption{
+  flex:1;
+}
+
+@media(max-width:1100px){
+  .pp-systemgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .pp-system.pp-system-landscape{grid-column:1/-1!important}
+}
+@media(max-width:900px){
+  .pp-feedback-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pp-editorgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+  .pp-systemgrid{grid-template-columns:1fr!important}
+  .pp-system.pp-system-landscape{
+    grid-column:auto!important;
+    grid-template-columns:1fr;
+  }
+  .pp-system.pp-system-landscape>img{
+    height:auto!important;
+    min-height:0;
+    aspect-ratio:1.2/1;
+    object-fit:cover!important;
+  }
+  .pp-system.pp-system-landscape>div:last-child{
+    border-left:0;
+    border-top:1px solid var(--l);
+    padding:24px!important;
+  }
+  .pp-editorgrid{grid-template-columns:1fr!important}
+}
+''', encoding="utf-8")
+
 PY
