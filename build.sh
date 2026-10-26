@@ -20,6 +20,11 @@ base64 -d assets/paperly-launch-good.png.b64 > dist/public/media/paperly/launch-
 base64 -d assets/paperly-launch-ok.png.b64 > dist/public/media/paperly/launch-ok.png
 base64 -d assets/paperly-launch-low-power.png.b64 > dist/public/media/paperly/launch-low-power.png
 
+# Higher-quality gallery assets + dedicated thumbnail set.
+cat quality-assets/part-*.txt | base64 -d > gallery-quality-assets.tar.gz
+tar -xzf gallery-quality-assets.tar.gz -C dist
+rm -f gallery-quality-assets.tar.gz
+
 find dist -name '*.html' -type f -exec sed -i 's#\.\./public/#public/#g' {} +
 
 python3 - <<'PY'
@@ -979,6 +984,15 @@ def _attr(tag, name):
     m = re.search(rf'{re.escape(name)}="([^"]*)"', tag)
     return m.group(1) if m else ""
 
+def _thumb_src(src):
+    # Bandit Trail cover has no dedicated thumb in this bundle; its source is already small.
+    if src == "public/media/bandit-trail/cover.webp":
+        return src
+    prefix = "public/media/"
+    if src.startswith(prefix):
+        return "public/media/thumbs/" + src[len(prefix):]
+    return src
+
 def _steam_markup(items):
     if not items:
         return ""
@@ -988,8 +1002,8 @@ def _steam_markup(items):
         thumbs.append(
             f'<button type="button" class="steam-thumb{selected}" data-index="{i}" '
             f'aria-label="Show image {i+1} of {len(items)}">'
-            f'<img src="{html_escape(item["src"], quote=True)}" '
-            f'alt="{html_escape(item["alt"], quote=True)}"></button>'
+            f'<img src="{html_escape(_thumb_src(item["src"]), quote=True)}" '
+            f'alt="{html_escape(item["alt"], quote=True)}" loading="lazy" decoding="async"></button>'
         )
     data = []
     for item in items:
@@ -1223,11 +1237,13 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 .steam-main img{
   display:block;
-  width:100%;
-  height:100%;
+  width:auto;
+  height:auto;
+  max-width:100%;
   max-height:720px;
   object-fit:contain;
   object-position:center;
+  image-rendering:auto;
 }
 .steam-nav{
   position:absolute;
@@ -1302,6 +1318,7 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   width:100%;
   height:100%;
   object-fit:cover;
+  image-rendering:auto;
 }
 .steam-thumb:hover{opacity:.9}
 .steam-thumb.is-active{
