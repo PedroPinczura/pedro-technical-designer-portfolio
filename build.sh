@@ -956,7 +956,7 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 /* ===== Recruiter scan emphasis ===== */
 .scan-key{
   display:inline!important;
-  color:inherit!important;
+  color:#ffffff!important;
   font-family:inherit!important;
   font-size:inherit!important;
   font-style:inherit!important;
@@ -966,8 +966,8 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
   text-transform:inherit!important;
   vertical-align:baseline!important;
   white-space:inherit!important;
-  -webkit-text-stroke:.18px currentColor;
-  text-shadow:0 0 .18px currentColor;
+  -webkit-text-stroke:.32px currentColor;
+  text-shadow:0 0 .28px currentColor;
 }
 ''', encoding="utf-8")
 
