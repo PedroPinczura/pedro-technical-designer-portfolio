@@ -1730,18 +1730,31 @@ def add_language_toggle(path, page, spanish=False):
     if "lang-toggle" in html:
         return
     if spanish:
-        toggle = f'<span class="lang-toggle" aria-label="Idioma"><a href="../{page}" hreflang="en" lang="en">EN</a><span>/</span><b aria-current="true">ES</b></span>'
+        toggle = f'<span class="lang-toggle" aria-label="Idioma"><a class="lang-flag" href="../{page}" hreflang="en" lang="en" aria-label="English" title="English">🇬🇧</a><b class="lang-flag is-active" aria-current="true" aria-label="Español" title="Español">🇪🇸</b></span>'
         alternate = f'<link rel="alternate" hreflang="en" href="../{page}"><link rel="alternate" hreflang="es" href="{page}">'
     else:
-        toggle = f'<span class="lang-toggle" aria-label="Language"><b aria-current="true">EN</b><span>/</span><a href="es/{page}" hreflang="es" lang="es">ES</a></span>'
+        toggle = f'<span class="lang-toggle" aria-label="Language"><b class="lang-flag is-active" aria-current="true" aria-label="English" title="English">🇬🇧</b><a class="lang-flag" href="es/{page}" hreflang="es" lang="es" aria-label="Español" title="Español">🇪🇸</a></span>'
         alternate = f'<link rel="alternate" hreflang="en" href="{page}"><link rel="alternate" hreflang="es" href="es/{page}">'
     html = html.replace('<a class="cv"', toggle + '<a class="cv"', 1)
     html = html.replace("</head>", alternate + "</head>", 1)
     p.write_text(html, encoding="utf-8")
 
+def replace_home_mark(path, label):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    # Replace only links whose complete visible content is the old "PP" mark.
+    html = re.sub(
+        r'(<a\\b[^>]*>)(\\s*)PP(\\s*)(</a>)',
+        lambda m: m.group(1) + m.group(2) + label + m.group(3) + m.group(4),
+        html
+    )
+    p.write_text(html, encoding="utf-8")
+
 for page in bilingual_pages:
     add_language_toggle(Path("dist") / page, page, spanish=False)
     add_language_toggle(Path("dist/es") / page, page, spanish=True)
+    replace_home_mark(Path("dist") / page, "HOME")
+    replace_home_mark(Path("dist/es") / page, "INICIO")
 
 # Spanish-only editorial fixes for layouts whose English line breaks do not translate well.
 home_es = Path("dist/es/index.html")
@@ -1759,32 +1772,37 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 .lang-toggle{
   display:inline-flex;
   align-items:center;
-  gap:5px;
-  padding:5px 7px;
+  gap:6px;
+  padding:4px 6px;
   border:1px solid rgba(255,255,255,.12);
   background:rgba(255,255,255,.025);
-  color:#667384;
-  font:9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  letter-spacing:.08em;
 }
-.lang-toggle a,
-.lang-toggle b{
-  color:inherit;
+.lang-flag{
+  display:inline-grid;
+  place-items:center;
+  min-width:24px;
+  min-height:22px;
+  padding:1px 2px;
+  border:1px solid transparent;
+  border-radius:3px;
+  opacity:.55;
   text-decoration:none;
-  font:inherit;
+  font-size:16px;
   line-height:1;
+  filter:saturate(.7);
+  transition:opacity .2s,border-color .2s,filter .2s,transform .2s;
 }
-.lang-toggle b{
-  color:#fff;
-  font-weight:700;
+.lang-flag.is-active{
+  opacity:1;
+  border-color:rgba(255,255,255,.28);
+  filter:saturate(1);
 }
-.lang-toggle a{
-  color:#94a3b6;
-  transition:color .2s;
-}
-.lang-toggle a:hover,
-.lang-toggle a:focus-visible{
-  color:var(--b2);
+a.lang-flag:hover,
+a.lang-flag:focus-visible{
+  opacity:1;
+  border-color:var(--b2);
+  filter:saturate(1);
+  transform:translateY(-1px);
 }
 @media(max-width:720px){
   .lang-toggle{
