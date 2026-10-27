@@ -1518,6 +1518,197 @@ def apply_es_meta(html, page):
     html = re.sub(r'<meta property="og:description" content="[^"]*">', f'<meta property="og:description" content="{desc}">', html)
     return html
 
+ES_COMMON_CREDIT = {
+    "PROFESSIONAL CREDIT / FULL PRODUCTION":"CRÉDITO PROFESIONAL / PRODUCCIÓN COMPLETA",
+    "PROFESSIONAL CREDIT / ADDITIONAL CONTENT QA":"CRÉDITO PROFESIONAL / QA DE CONTENIDO ADICIONAL",
+    "PROFESSIONAL CREDIT / TARGETED QA SUPPORT":"CRÉDITO PROFESIONAL / SOPORTE QA PUNTUAL",
+    "PROFESSIONAL CREDIT / EARLY BETA QA":"CRÉDITO PROFESIONAL / QA EN BETA TEMPRANA",
+    "OFFICIAL ARTWORK / PROFESSIONAL CREDIT":"ARTE OFICIAL / CRÉDITO PROFESIONAL",
+    "OFFICIAL MEDIA / PROFESSIONAL CREDIT":"MATERIAL OFICIAL / CRÉDITO PROFESIONAL",
+    "Early production → release":"Producción temprana → lanzamiento",
+    "Scoped additional-content QA":"QA específico de contenido adicional",
+    "Targeted production support":"Soporte puntual de producción",
+    "Early beta / targeted support":"Beta temprana / soporte puntual",
+    "Functional testing":"Testing funcional",
+    "Cross-platform QA":"QA multiplataforma",
+    "Regression testing":"Testing de regresión",
+    "Bug reporting & verification":"Reporte y verificación de bugs",
+    "Bug reproduction & verification":"Reproducción y verificación de bugs",
+    "Bug reproduction & reporting":"Reproducción y reporte de bugs",
+    "NBA rules validation":"Validación de reglas NBA",
+    "Gameplay / design feedback":"Feedback de gameplay / diseño",
+    "UI / UX feedback":"Feedback de UI / UX",
+    "Navigation & mission-flow feedback":"Feedback de navegación y flujo de misiones",
+    "English developer communication":"Comunicación con el estudio en inglés",
+    "Weapon balancing & validation":"Balance y validación de armas",
+    "Equipment / item QA":"QA de equipamiento / objetos",
+    "Animation-state validation":"Validación de estados de animación",
+    "Traversal edge-case testing":"Testing de casos límite de traversal",
+    "English QA workflow":"Flujo de QA en inglés / polaco",
+    "Mission validation":"Validación de misiones",
+    "Character behaviour QA":"QA de comportamiento de personajes",
+    "Unlock / progression checks":"Comprobación de desbloqueos / progresión",
+    "Item validation":"Validación de objetos",
+    "New content validation":"Validación de contenido nuevo",
+    "Early-build verification":"Verificación de builds tempranas",
+    "Feature behaviour checks":"Comprobación de comportamiento de funcionalidades",
+    "Design Feedback":"Feedback de diseño",
+    "Design / UX Feedback":"Feedback de diseño / UX",
+    "Full production cycle":"Ciclo completo de producción",
+    "targeted production support":"soporte puntual de producción",
+    "early beta":"beta temprana",
+    "new content validation":"validación de contenido nuevo",
+    "PROFESSIONAL CREDIT":"CRÉDITO PROFESIONAL",
+}
+
+ES_PAGE_POLISH = {
+    "index.html":{
+        "Personal Projects":"Proyectos personales",
+        ">PROJECTS<":">PROYECTOS<",
+    },
+    "work.html":{
+        "WORK / PEDRO PINCZURA":"PROYECTOS / PEDRO PINCZURA",
+    },
+    "paperly.html":{
+        "Launch timing → flight power":"Timing de lanzamiento → potencia de vuelo",
+        "Analog touch steering":"Control táctil analógico",
+        "Pointer steering":"Control por puntero",
+        "Arcade flight simulation":"Simulación de vuelo arcade",
+        "Vortex: mechanic + consequence":"Vórtice: mecánica + consecuencia",
+        "One normalized timing value drives both immediate feedback and the actual launch state.":"Un único valor normalizado controla tanto el feedback inmediato como el estado real del lanzamiento.",
+        "Dead zone + normalization + smoothing gives analog control without a visible joystick.":"Zona muerta + normalización + suavizado permiten control analógico sin un joystick visible.",
+        "Forward motion and vertical motion remain separately tuneable before being combined.":"El movimiento frontal y el vertical siguen siendo ajustables por separado antes de combinarse.",
+        "The boost compensates a falling plane, then makes future gravity slightly harsher to avoid endless free height.":"El boost compensa un avión en caída y después endurece ligeramente la gravedad futura para evitar altura gratuita infinita.",
+        "LAUNCH POWER":"POTENCIA DE LANZAMIENTO",
+        "Oscillate from 0 → 1":"Oscila de 0 → 1",
+        "Freeze the selected value":"Congela el valor seleccionado",
+        "Convert to launch power":"Convierte a potencia de lanzamiento",
+        "Audio + partículas + camera shake":"Audio + partículas + sacudida de cámara",
+        "READABILITY":"LEGIBILIDAD",
+        "CAMERA":"CÁMARA",
+        ">VIEW ↗<":">VER ↗<",
+        "Main menu: best distance, next goal and reward loop.":"Menú principal: mejor distancia, siguiente objetivo y bucle de recompensa.",
+        "Progression upgrades alter core flight parameters.":"Las mejoras de progresión modifican parámetros clave del vuelo.",
+        "Cosmetic progression and preview flow.":"Progresión cosmética y flujo de previsualización.",
+        "Run results, earnings and record feedback.":"Resultados de la partida, ganancias y feedback de récord.",
+        "Settings and reset-progress controls.":"Ajustes y controles para reiniciar el progreso.",
+        "Main menu with best distance, goal and reward":"Menú principal con mejor distancia, objetivo y recompensa",
+        "Power, Glide, Control and Earnings upgrade screen":"Pantalla de mejoras de Power, Glide, Control y Earnings",
+        "Cosmetic skin preview and purchase flow":"Previsualización y compra de skins",
+        "Flight results with new-record celebration":"Resultados de vuelo con celebración de nuevo récord",
+        "Settings and reset-progress screen":"Pantalla de ajustes y reinicio de progreso",
+        "PAPERly main menu":"Menú principal de PAPERly",
+        "PAPERly upgrades menu":"Menú de mejoras de PAPERly",
+        "PAPERly neon skin preview":"Previsualización de skin neon de PAPERly",
+        "PAPERly new record results":"Resultados de nuevo récord de PAPERly",
+        "PAPERly settings screen":"Pantalla de ajustes de PAPERly",
+        "Full terrain and vortex layout inside Unity.":"Distribución completa del terreno y los vórtices dentro de Unity.",
+        "Plane, trails and vortex setup inside Scene view.":"Configuración del avión, trails y vórtices dentro de Scene View.",
+        "Out-of-bounds safety flow and warning state.":"Flujo de seguridad fuera de límites y estado de advertencia.",
+        "A COMPLETE RUN LOOP,":"UN BUCLE DE PARTIDA COMPLETO,",
+        "READY FOR MORE CONTENT.":"LISTO PARA MÁS CONTENIDO.",
+        "← ALL PROJECTS":"← TODOS LOS PROYECTOS",
+    },
+    "bandit-trail.html":{
+        "Play / Download ↗":"Jugar / Descargar ↗",
+        "Watch trailer ↗":"Ver tráiler ↗",
+        "PUBLIC BUILD / UE4":"BUILD PÚBLICA / UE4",
+        "RUN. SHOOT.":"CORRE. DISPARA.",
+        ">TEAM<":">EQUIPO<",
+        "Design direction":"Dirección de diseño",
+        "RETHINKING THE":"REPLANTEANDO EL",
+        "INFINITE RUNNER.":"INFINITE RUNNER.",
+        "RUN. REACT.":"CORRE. REACCIONA.",
+        ">Run<":">Correr<",
+        ">Dodge<":">Esquivar<",
+        ">Fight<":">Combatir<",
+        ">Unlock<":">Desbloquear<",
+        ">Run Again<":">Volver a correr<",
+        "SHAPE THE RUN.":"DEFINEN LA PARTIDA.",
+        "FREE MOVEMENT":"MOVIMIENTO LIBRE",
+        "SHOOTING":"DISPAROS",
+        "ENEMY ENCOUNTERS":"ENCUENTROS CON ENEMIGOS",
+        "PROCEDURAL ENVIRONMENTS":"ENTORNOS PROCEDURALES",
+        ">Development<":">Desarrollo<",
+        "FROM UNIVERSITY PROJECT TO PUBLIC BUILD.":"DE PROYECTO UNIVERSITARIO A BUILD PÚBLICA.",
+        "Public playtesting":"Playtesting público",
+        "BUILD. RELEASE. LISTEN. ITERATE.":"CONSTRUYE. PUBLICA. ESCUCHA. ITERA.",
+        "Western town environment and low-poly visual direction":"Entorno de pueblo del oeste y dirección visual low-poly",
+        ">Release<":">Lanzamiento<",
+        "PUBLICLY PLAYABLE.":"JUGABLE PÚBLICAMENTE.",
+        "Project notes":"Notas del proyecto",
+        "Open public project ↗":"Abrir proyecto público ↗",
+        "Shared ownership":"Responsabilidad compartida",
+        "DESIGNED & DEVELOPED TOGETHER.":"DISEÑADO Y DESARROLLADO JUNTOS.",
+        "← ALL PROJECTS":"← TODOS LOS PROYECTOS",
+        "NEXT PROJECT":"SIGUIENTE PROYECTO",
+    },
+    "kids-table.html":{
+        "Official product ↗":"Producto oficial ↗",
+        "THE PRODUCT":"EL PRODUCTO",
+        "SELECTED MINI-GAMES":"MINIJUEGOS SELECCIONADOS",
+        "Cooperative play on the physical KIDS&#x27;TABLE hardware.":"Juego cooperativo en el hardware físico de KIDS&#x27;TABLE.",
+        "BACK TO WORK ↗":"VOLVER A PROYECTOS ↗",
+    },
+    "rpg-systems.html":{
+        "← PERSONAL PROJECTS":"← PROYECTOS PERSONALES",
+        "PERSONAL PROJECT / CASE STUDY IN PROGRESS":"PROYECTO PERSONAL / CASO DE ESTUDIO EN PREPARACIÓN",
+        ">Combat<":">Combate<",
+        ">Inventory<":">Inventario<",
+        ">Dialogue<":">Diálogo<",
+        ">Quests<":">Misiones<",
+        ">Shops<":">Tiendas<",
+        ">Abilities<":">Habilidades<",
+    },
+    "survival-systems.html":{
+        "← PERSONAL PROJECTS":"← PROYECTOS PERSONALES",
+        "PERSONAL PROJECT / CASE STUDY IN PROGRESS":"PROYECTO PERSONAL / CASO DE ESTUDIO EN PREPARACIÓN",
+        ">Survival<":">Supervivencia<",
+        ">Inventory<":">Inventario<",
+        ">Building<":">Construcción<",
+        ">AI<":">IA<",
+        ">Save System<":">Sistema de guardado<",
+    },
+    "nba-bounce.html":{
+        "Functional QA · Design Feedback":"Functional QA · Feedback de diseño",
+        "NBA BOUNCE / PROFESSIONAL CREDIT":"NBA BOUNCE / CRÉDITO PROFESIONAL",
+        "· Design Feedback · Full production cycle":"· Feedback de diseño · Ciclo completo de producción",
+    },
+    "barbie-horse-trails.html":{
+        "Functional QA · Design / UX Feedback":"Functional QA · Feedback de diseño / UX",
+        "PROGRESSION.":"PROGRESIÓN.",
+        "BARBIE HORSE TRAILS / PROFESSIONAL CREDIT":"BARBIE HORSE TRAILS / CRÉDITO PROFESIONAL",
+        "· Design / UX Feedback · Full production cycle":"· Feedback de diseño / UX · Ciclo completo de producción",
+    },
+    "dayz.html":{
+        "DAYZ / PROFESSIONAL CREDIT":"DAYZ / CRÉDITO PROFESIONAL",
+        "DayZ armed player encounter in an open area":"Encuentro armado de un jugador de DayZ en una zona abierta",
+        "DayZ player aiming a rifle":"Jugador de DayZ apuntando con un rifle",
+        "DayZ player holding a firearm":"Jugador de DayZ sosteniendo un arma de fuego",
+        "DayZ player in a forest environment":"Jugador de DayZ en un entorno boscoso",
+        "DayZ player with a weapon in an urban environment":"Jugador de DayZ con un arma en un entorno urbano",
+        "DayZ combat scene":"Escena de combate de DayZ",
+        "DayZ player using a firearm":"Jugador de DayZ usando un arma de fuego",
+        "DayZ armed character":"Personaje armado de DayZ",
+        "DayZ weapon gameplay":"Gameplay de armas de DayZ",
+    },
+    "chicken-run-eggstraction.html":{
+        "CHICKEN RUN: EGGSTRACTION / PROFESSIONAL CREDIT":"CHICKEN RUN: EGGSTRACTION / CRÉDITO PROFESIONAL",
+    },
+    "the-cat-in-the-hat-rainy-day-mayhem.html":{
+        "Functional QA · New Content Validation":"Functional QA · Validación de contenido nuevo",
+        "THE CAT IN THE HAT: RAINY DAY MAYHEM / PROFESSIONAL CREDIT":"THE CAT IN THE HAT: RAINY DAY MAYHEM / CRÉDITO PROFESIONAL",
+    },
+}
+
+def apply_es_polish(html, page):
+    if page in ("nba-bounce.html","barbie-horse-trails.html","dayz.html","chicken-run-eggstraction.html","the-cat-in-the-hat-rainy-day-mayhem.html"):
+        for source, target in ES_COMMON_CREDIT.items():
+            html = html.replace(source, target)
+    for source, target in ES_PAGE_POLISH.get(page, {}).items():
+        html = html.replace(source, target)
+    return html
+
 es_dir = Path("dist/es")
 es_dir.mkdir(parents=True, exist_ok=True)
 for page in bilingual_pages:
@@ -1525,6 +1716,7 @@ for page in bilingual_pages:
     target = es_dir / page
     translated = translate_visible_es(source.read_text(encoding="utf-8"))
     translated = apply_es_meta(translated, page)
+    translated = apply_es_polish(translated, page)
     target.write_text(translated, encoding="utf-8")
 
 def add_language_toggle(path, page, spanish=False):
