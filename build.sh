@@ -3045,4 +3045,139 @@ for page in bilingual_pages:
         html = _micro_polish_html(html)
         p.write_text(html, encoding="utf-8")
 
+
+# ===== Complete linked-element hover coverage =====
+LINK_HOVER_CSS = r'''
+
+/* ===== Microinteractions V21: complete link coverage ===== */
+a.micro-link{
+  cursor:pointer;
+  transition:
+    color .18s ease,
+    border-color .18s ease,
+    background-color .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+.micro-arrow{
+  display:inline-block;
+  transition:transform .18s ease,opacity .18s ease;
+  will-change:transform;
+}
+
+@media(hover:hover){
+  a.micro-link:hover{
+    color:#fff;
+  }
+  a.micro-link:hover .micro-arrow-right{
+    transform:translateX(3px);
+  }
+  a.micro-link:hover .micro-arrow-left{
+    transform:translateX(-3px);
+  }
+  a.micro-link:hover .micro-arrow-down{
+    transform:translateY(2px);
+  }
+
+  .footerlinks a:hover{
+    color:#fff;
+  }
+
+  a.text-link:hover,
+  a.cta:hover,
+  a.official:hover,
+  a.trailer:hover,
+  a.bt-secondary:hover{
+    color:#fff;
+    border-color:rgba(105,168,255,.58);
+    background-color:rgba(47,128,255,.06);
+  }
+
+  a.credit-nav-item:hover strong{
+    color:var(--b2);
+  }
+  a.credit-nav-item:hover span{
+    color:#a8cfff;
+  }
+  a.all-credits:hover{
+    color:#fff;
+  }
+
+  a.back:hover,
+  a.ey:hover{
+    color:#fff;
+  }
+}
+
+/* Existing dedicated buttons keep their own arrow animation to avoid double movement. */
+a.primary .micro-arrow,
+a.contact-link .micro-arrow{
+  transition:none;
+}
+a.primary:hover .micro-arrow,
+a.contact-link:hover .micro-arrow{
+  transform:none;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .micro-arrow{
+    transform:none!important;
+  }
+}
+'''
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + LINK_HOVER_CSS, encoding="utf-8")
+
+def _complete_anchor_microinteractions(html):
+    anchor_re = re.compile(r'<a\b(?P<attrs>[^>]*)>(?P<inner>[\s\S]*?)</a>', re.I)
+
+    def repl(match):
+        attrs = match.group("attrs")
+        inner = match.group("inner")
+
+        # Normalize previous arrow wrappers so this final pass is deterministic.
+        inner = re.sub(
+            r'<span class="micro-arrow(?:\s+micro-arrow-(?:right|left|down))?">([↗→←↓])</span>',
+            r'\1',
+            inner
+        )
+
+        cls_match = re.search(r'class="([^"]*)"', attrs, re.I)
+        classes = cls_match.group(1).split() if cls_match else []
+        dedicated = ("primary" in classes) or ("contact-link" in classes)
+
+        if any(ch in inner for ch in ("↗","→","←","↓")):
+            if "micro-link" not in classes:
+                classes.append("micro-link")
+                if cls_match:
+                    new_class = 'class="' + " ".join(classes) + '"'
+                    attrs = attrs[:cls_match.start()] + new_class + attrs[cls_match.end():]
+                else:
+                    attrs += ' class="micro-link"'
+
+            # Dedicated buttons already animate their own direct child icon.
+            if not dedicated:
+                parts = re.split(r'(<[^>]+>)', inner)
+                for i, part in enumerate(parts):
+                    if part.startswith("<") and part.endswith(">"):
+                        continue
+                    part = part.replace("↗", '<span class="micro-arrow micro-arrow-right">↗</span>')
+                    part = part.replace("→", '<span class="micro-arrow micro-arrow-right">→</span>')
+                    part = part.replace("←", '<span class="micro-arrow micro-arrow-left">←</span>')
+                    part = part.replace("↓", '<span class="micro-arrow micro-arrow-down">↓</span>')
+                    parts[i] = part
+                inner = "".join(parts)
+
+        return "<a" + attrs + ">" + inner + "</a>"
+
+    return anchor_re.sub(repl, html)
+
+for page in bilingual_pages:
+    for prefix in ("dist", "dist/es"):
+        p = Path(prefix) / page
+        html = p.read_text(encoding="utf-8")
+        html = _complete_anchor_microinteractions(html)
+        p.write_text(html, encoding="utf-8")
+
 PY
