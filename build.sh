@@ -1744,7 +1744,7 @@ def replace_home_mark(path, label):
     html = p.read_text(encoding="utf-8")
     # Replace only links whose complete visible content is the old "PP" mark.
     html = re.sub(
-        r'(<a\\b[^>]*>)(\\s*)PP(\\s*)(</a>)',
+        r'(<a\b[^>]*>)(\s*)PP(\s*)(</a>)',
         lambda m: m.group(1) + m.group(2) + label + m.group(3) + m.group(4),
         html
     )
