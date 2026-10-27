@@ -2768,4 +2768,127 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+# ===== SEO / social metadata + invisible analytics + ES accessibility =====
+SITE_ORIGIN = "https://pedro-pinczura-portfolio.vercel.app"
+
+# Minimal vector favicon: personal initial, no impact on page layout.
+favicon = Path("dist/favicon.svg")
+favicon.write_text('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#0b0d10"/><path d="M18 13h20c10 0 17 6 17 15s-7 15-17 15H29v8H18V13zm11 10v10h8c4 0 7-2 7-5s-3-5-7-5h-8z" fill="#f4f7fb"/></svg>''', encoding="utf-8")
+
+SOCIAL_IMAGE = SITE_ORIGIN + "/public/media/paperly/cover-portfolio.webp"
+
+def _canonical_url(page, spanish=False):
+    if page == "index.html":
+        return SITE_ORIGIN + ("/es/" if spanish else "/")
+    return SITE_ORIGIN + ("/es/" if spanish else "/") + page
+
+def _page_meta(html, page, spanish=False):
+    title_m = re.search(r"<title>(.*?)</title>", html, flags=re.I|re.S)
+    desc_m = re.search(r'<meta name="description" content="([^"]*)">', html, flags=re.I)
+    title = re.sub(r"\s+", " ", title_m.group(1)).strip() if title_m else "Pedro Pinczura — Technical Designer"
+    desc = desc_m.group(1).strip() if desc_m else (
+        "Portfolio de Pedro Pinczura, Technical Designer y desarrollador multidisciplinar de videojuegos."
+        if spanish else
+        "Pedro Pinczura's Technical Design and game development portfolio."
+    )
+    url = _canonical_url(page, spanish)
+    locale = "es_ES" if spanish else "en_GB"
+    meta = (
+        f'<link rel="canonical" href="{url}">'
+        f'<link rel="icon" type="image/svg+xml" href="{"../" if spanish else ""}favicon.svg">'
+        f'<meta property="og:site_name" content="Pedro Pinczura Portfolio">'
+        f'<meta property="og:locale" content="{locale}">'
+        f'<meta property="og:title" content="{html_escape(title, quote=True)}">'
+        f'<meta property="og:description" content="{html_escape(desc, quote=True)}">'
+        f'<meta property="og:url" content="{url}">'
+        f'<meta property="og:image" content="{SOCIAL_IMAGE}">'
+        f'<meta property="og:image:alt" content="{"Portfolio de Pedro Pinczura — Technical Designer" if spanish else "Pedro Pinczura — Technical Designer portfolio"}">'
+        f'<meta name="twitter:card" content="summary_large_image">'
+        f'<meta name="twitter:title" content="{html_escape(title, quote=True)}">'
+        f'<meta name="twitter:description" content="{html_escape(desc, quote=True)}">'
+        f'<meta name="twitter:image" content="{SOCIAL_IMAGE}">'
+    )
+    # Avoid duplicate injection on rebuilds.
+    if 'property="og:site_name"' not in html:
+        html = html.replace("</head>", meta + "</head>", 1)
+    return html
+
+ANALYTICS_SNIPPET = '''<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script><script defer src="/_vercel/insights/script.js"></script>'''
+
+def _add_invisible_analytics(html):
+    if '/_vercel/insights/script.js' not in html:
+        html = html.replace("</head>", ANALYTICS_SNIPPET + "</head>", 1)
+    return html
+
+ES_ACCESSIBILITY = {
+    'aria-label="Primary navigation"':'aria-label="Navegación principal"',
+    'aria-label="English"':'aria-label="Inglés"',
+    'title="English"':'title="Inglés"',
+    'aria-label="Roles and disciplines"':'aria-label="Roles y disciplinas"',
+    'aria-label="Profile highlights"':'aria-label="Aspectos destacados del perfil"',
+    'aria-label="Selected project imagery"':'aria-label="Imágenes de proyectos seleccionados"',
+    'aria-label="Filter personal projects"':'aria-label="Filtrar proyectos personales"',
+    'aria-label="Professional credit navigation"':'aria-label="Navegación de créditos profesionales"',
+    'aria-label="Close"':'aria-label="Cerrar"',
+    'alt="PAPERly cover artwork with a paper plane flying over a stylized landscape"':'alt="Arte de portada de PAPERly con un avión de papel sobrevolando un paisaje estilizado"',
+    'alt="NBA BOUNCE official artwork"':'alt="Arte oficial de NBA BOUNCE"',
+    'alt="Bandit Trail western shooter gameplay"':'alt="Gameplay de estilo western de Bandit Trail"',
+    'alt="Children using a KIDS\\'TABLE interactive table"':'alt="Niños utilizando una mesa interactiva KIDS\\'TABLE"',
+    'alt="Low-poly western outlaw aiming a rifle in Bandit Trail"':'alt="Forajido low-poly apuntando con un rifle en Bandit Trail"',
+    'alt="Children playing together on a KIDS\\'TABLE interactive table"':'alt="Niños jugando juntos en una mesa interactiva KIDS\\'TABLE"',
+    'alt="PAPERly gameplay showing the plane in flight"':'alt="Gameplay de PAPERly mostrando el avión en vuelo"',
+    'alt="Barbie Horse Trails official artwork"':'alt="Arte oficial de Barbie Horse Trails"',
+    'alt="DayZ official artwork"':'alt="Arte oficial de DayZ"',
+    'alt="Chicken Run Eggstraction official artwork"':'alt="Arte oficial de Chicken Run: Eggstraction"',
+    'alt="The Cat in the Hat Rainy Day Mayhem official artwork"':'alt="Arte oficial de The Cat in the Hat: Rainy Day Mayhem"',
+    'alt="PAPERly gameplay showing the paper plane flying through the landscape"':'alt="Gameplay de PAPERly con el avión de papel volando por el paisaje"',
+    'alt="PAPERly plane in flight"':'alt="Avión de PAPERly en vuelo"',
+    'alt="PAPERly gameplay with the plane ready to steer"':'alt="Gameplay de PAPERly con el avión preparado para ser controlado"',
+    'alt="PAPERly plane flying through a vortex"':'alt="Avión de PAPERly atravesando un vórtice"',
+    'alt="PAPERly plane and environment inside Unity Scene view"':'alt="Avión y entorno de PAPERly en la Vista de Escena de Unity"',
+    'alt="Unity Inspector showing PAPERly PlaneController parameters"':'alt="Inspector de Unity mostrando parámetros de PlaneController de PAPERly"',
+    'alt="PAPERly PERFECT launch feedback"':'alt="Feedback PERFECT de lanzamiento en PAPERly"',
+    'alt="PAPERly GOOD launch feedback"':'alt="Feedback GOOD de lanzamiento en PAPERly"',
+    'alt="PAPERly OK launch feedback"':'alt="Feedback OK de lanzamiento en PAPERly"',
+    'alt="PAPERly LOW POWER launch feedback"':'alt="Feedback LOW POWER de lanzamiento en PAPERly"',
+    'alt="PAPERly plane passing through a vortex"':'alt="Avión de PAPERly atravesando un vórtice"',
+    'alt="PAPERly terrain overview in Unity"':'alt="Vista general del terreno de PAPERly en Unity"',
+    'alt="PAPERly plane and vortex in Unity Scene view"':'alt="Avión y vórtice de PAPERly en la Vista de Escena de Unity"',
+    'alt="PAPERly out of bounds warning"':'alt="Aviso de fuera de límites en PAPERly"',
+    'alt="Bandit Trail player character running through the environment"':'alt="Personaje jugable de Bandit Trail corriendo por el entorno"',
+    'alt="Bandit Trail player firing at an explosive barrel"':'alt="Jugador de Bandit Trail disparando a un barril explosivo"',
+    'alt="Western town environment from Bandit Trail"':'alt="Entorno de pueblo del oeste de Bandit Trail"',
+    'alt="Bandit Trail gameplay with HUD showing run resources"':'alt="Gameplay de Bandit Trail con HUD mostrando los recursos de la partida"',
+    'alt="KIDS\\'TABLE logo"':'alt="Logo de KIDS\\'TABLE"',
+    'alt="Barbie Horse Trails official gameplay artwork"':'alt="Arte oficial de gameplay de Barbie Horse Trails"',
+    'alt="DayZ survivor overlooking the landscape"':'alt="Superviviente de DayZ observando el paisaje"',
+    'alt="DayZ indoor firefight with a rifle"':'alt="Tiroteo en interior con rifle en DayZ"',
+    'alt="DayZ survivors with varied weapon loadouts"':'alt="Supervivientes de DayZ con distintos loadouts de armas"',
+    'alt="DayZ survivor combat encounter near a crashed helicopter"':'alt="Encuentro de combate en DayZ junto a un helicóptero estrellado"',
+    'alt="DayZ survivor in protective equipment"':'alt="Superviviente de DayZ con equipo de protección"',
+    'alt="DayZ collection of firearms and weapon types"':'alt="Colección de armas de fuego y tipos de arma de DayZ"',
+    'alt="DayZ survivor using a crossbow near railway tracks"':'alt="Superviviente de DayZ usando una ballesta junto a las vías"',
+    'alt="DayZ armed players in an underground environment"':'alt="Jugadores armados de DayZ en un entorno subterráneo"',
+    'alt="DayZ survivor facing a bear with a shotgun"':'alt="Superviviente de DayZ enfrentándose a un oso con una escopeta"',
+    'alt="The Cat in the Hat Rainy Day Mayhem key art"':'alt="Key art de The Cat in the Hat: Rainy Day Mayhem"',
+}
+
+for page in bilingual_pages:
+    en = Path("dist") / page
+    es = Path("dist/es") / page
+
+    en_html = en.read_text(encoding="utf-8")
+    en_html = _page_meta(en_html, page, spanish=False)
+    en_html = _add_invisible_analytics(en_html)
+    en.write_text(en_html, encoding="utf-8")
+
+    es_html = es.read_text(encoding="utf-8")
+    es_html = _page_meta(es_html, page, spanish=True)
+    es_html = _add_invisible_analytics(es_html)
+    for source, target in ES_ACCESSIBILITY.items():
+        es_html = es_html.replace(source, target)
+    es.write_text(es_html, encoding="utf-8")
+
+
 PY
