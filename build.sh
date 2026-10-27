@@ -1551,7 +1551,7 @@ home_es = Path("dist/es/index.html")
 home_text = home_es.read_text(encoding="utf-8")
 home_text = home_text.replace(
     '<div class="ey">Créditos profesionales</div><strong>CRÉDITOS<br>CRÉDITOS</strong>',
-    '<div class="ey">Créditos profesionales</div><strong>TRABAJO<br>COMERCIAL.</strong>'
+    '<div class="ey">Créditos profesionales</div><strong>CRÉDITOS<br>PROFESIONALES.</strong>'
 )
 home_es.write_text(home_text, encoding="utf-8")
 
