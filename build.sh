@@ -1613,7 +1613,7 @@ ES_PAGE_POLISH = {
     "bandit-trail.html":{
         "Play / Download ↗":"Jugar / Descargar ↗",
         "Play / Download":"Jugar / Descargar",
-        "PLAYABLE.":"JUGABLE.",
+        "PLAYABLE.":"DISPONIBLE PARA JUGAR.",
         "Watch trailer ↗":"Ver tráiler ↗",
         "PUBLIC BUILD / UE4":"BUILD PÚBLICA / UE4",
         "RUN. SHOOT.":"CORRE. DISPARA.",
