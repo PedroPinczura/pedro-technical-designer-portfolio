@@ -2589,4 +2589,150 @@ for page in bilingual_pages:
     if leftovers:
         raise SystemExit(f"Untranslated ES text remains in {page}: {leftovers}")
 
+
+# ===== Home hero showcase: unified 16:9 cards =====
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== Home showcase V19: four equal horizontal frames ===== */
+.recruiter-showcase{
+  min-height:0!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:none!important;
+  grid-auto-rows:auto!important;
+  gap:12px!important;
+  padding:12px!important;
+  align-content:center;
+}
+.showcase-main,
+.showcase-wide{
+  grid-row:auto!important;
+  grid-column:auto!important;
+}
+.showcase-tile{
+  position:relative!important;
+  display:block!important;
+  aspect-ratio:16/9!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:#090c10!important;
+}
+.showcase-tile::before{
+  display:none!important;
+}
+.showcase-tile::after{
+  content:""!important;
+  position:absolute!important;
+  z-index:1!important;
+  inset:0!important;
+  display:block!important;
+  background:
+    linear-gradient(180deg,rgba(5,8,12,.02) 44%,rgba(5,8,12,.18) 62%,rgba(5,8,12,.92) 100%)!important;
+  pointer-events:none!important;
+}
+.showcase-tile img{
+  position:absolute!important;
+  z-index:0!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  padding:0!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  transform:scale(1.001)!important;
+  filter:none!important;
+  transition:transform .5s cubic-bezier(.2,.75,.2,1),filter .3s ease!important;
+}
+.showcase-paperly img{object-position:center 50%!important}
+.showcase-nba img{object-position:center 28%!important}
+.showcase-bandit img{object-position:center 50%!important}
+.showcase-kids img{object-position:center 42%!important}
+
+.showcase-tile:hover img,
+.showcase-tile:focus-visible img{
+  transform:scale(1.04)!important;
+  filter:brightness(1.06)!important;
+}
+.showcase-tile .tile-shade{
+  display:none!important;
+}
+.showcase-tile .tile-copy{
+  position:absolute!important;
+  z-index:2!important;
+  left:16px!important;
+  right:16px!important;
+  bottom:14px!important;
+  display:grid!important;
+  gap:3px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+  text-shadow:0 2px 18px rgba(0,0,0,.72);
+}
+.showcase-tile .tile-copy small{
+  color:#9ec6ff!important;
+  font-size:8px!important;
+  letter-spacing:.09em!important;
+}
+.showcase-tile .tile-copy strong{
+  color:#fff!important;
+  font-size:clamp(17px,1.5vw,23px)!important;
+  line-height:1!important;
+}
+.showcase-label{
+  top:20px!important;
+  right:20px!important;
+  left:auto!important;
+  z-index:4!important;
+  background:rgba(5,8,12,.76)!important;
+  backdrop-filter:blur(8px);
+}
+
+@media(max-width:1100px){
+  .recruiter-showcase{
+    min-height:0!important;
+  }
+}
+@media(max-width:720px){
+  .recruiter-showcase{
+    min-height:0!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    padding:8px!important;
+  }
+  .showcase-tile .tile-copy{
+    left:10px!important;
+    right:10px!important;
+    bottom:9px!important;
+  }
+  .showcase-tile .tile-copy small{
+    font-size:6.5px!important;
+  }
+  .showcase-tile .tile-copy strong{
+    font-size:14px!important;
+  }
+  .showcase-label{
+    top:14px!important;
+    right:14px!important;
+    font-size:7px!important;
+  }
+}
+@media(max-width:430px){
+  .recruiter-showcase{
+    grid-template-columns:1fr!important;
+  }
+  .showcase-tile .tile-copy small{
+    font-size:7px!important;
+  }
+  .showcase-tile .tile-copy strong{
+    font-size:16px!important;
+  }
+}
+''', encoding="utf-8")
+
 PY
