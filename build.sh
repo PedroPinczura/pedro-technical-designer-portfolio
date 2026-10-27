@@ -2493,4 +2493,100 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+# ===== Final Spanish-language sanitation =====
+# Run this at the very end because some galleries/navigation helpers are injected
+# after the initial ES translation pass.
+ES_FINAL_GLOBAL = {
+    "SURVIVE.":"SOBREVIVE.",
+    "PUBLICLY DISPONIBLE PARA JUGAR.":"DISPONIBLE PÚBLICAMENTE.",
+    ">PUBLICLY<":">PÚBLICAMENTE<",
+    "Select any image to inspect it at full size.":"Selecciona cualquier imagen para verla a tamaño completo.",
+    "Implementation context":"Contexto de implementación",
+    "GAME VIEW.":"VISTA DE JUEGO.",
+    "SCENE VIEW.":"VISTA DE ESCENA.",
+    "FEATURED CASE STUDY":"CASO DE ESTUDIO DESTACADO",
+    "FLIGHT VISUALS":"VISUALES DE VUELO",
+    ">Role<":">Rol<",
+    ">Period<":">Periodo<",
+    "MY ROLE":"MI ROL",
+    "DESIGN × ENGINEERING":"DISEÑO × INGENIERÍA",
+    "Interconnected gameplay systems":"Sistemas de gameplay interconectados",
+    "Systems focus":"Enfoque de sistemas",
+    "Design / UX feedback":"Feedback de diseño / UX",
+    "Co-Designer / Co-Developer":"Co-diseñador / Co-desarrollador",
+    "CO-DESIGNER / CO-DEVELOPER":"CO-DISEÑADOR / CO-DESARROLLADOR",
+    "Game Developer":"Desarrollador de videojuegos",
+    "01 / EMAIL":"01 / CORREO",
+    "EMAIL ↗":"CORREO ↗",
+    "Power, Glide, Control and Earnings":"Potencia, Planeo, Control y Ganancias",
+    "Previous image":"Imagen anterior",
+    "Next image":"Imagen siguiente",
+    "Open image at full size":"Abrir imagen a tamaño completo",
+    "Gallery thumbnails":"Miniaturas de la galería",
+    "Close image preview":"Cerrar vista previa de imagen",
+    "<span>Menu</span>":"<span>Menú</span>",
+}
+
+ES_FINAL_PAGE = {
+    "paperly.html":{
+        "Plane, trails and vortex setup inside Scene View.":"Configuración del avión, trails y vórtices dentro de la Vista de Escena.",
+    },
+    "bandit-trail.html":{
+        "PUBLICLY PLAYABLE.":"DISPONIBLE PÚBLICAMENTE.",
+    },
+}
+
+for page in bilingual_pages:
+    p = Path("dist/es") / page
+    html = p.read_text(encoding="utf-8")
+    for source, target in ES_FINAL_GLOBAL.items():
+        html = html.replace(source, target)
+    for source, target in ES_FINAL_PAGE.get(page, {}).items():
+        html = html.replace(source, target)
+
+    # Production is a discipline name, but in the Spanish portfolio we use the
+    # Spanish form rather than leaving an isolated English word.
+    html = re.sub(r'\bProduction\b', 'Producción', html)
+
+    # Localize dynamically numbered Steam-style gallery labels.
+    html = re.sub(
+        r'aria-label="Show image (\d+) of (\d+)"',
+        r'aria-label="Mostrar imagen \1 de \2"',
+        html
+    )
+    p.write_text(html, encoding="utf-8")
+
+# Guard against the known classes of untranslated editorial text returning.
+ES_FORBIDDEN = [
+    "SURVIVE.",
+    "PUBLICLY",
+    "Implementation context",
+    "GAME VIEW.",
+    "SCENE VIEW.",
+    "FEATURED CASE STUDY",
+    "Select any image to inspect it at full size.",
+    ">Role<",
+    ">Period<",
+    "MY ROLE",
+    "DESIGN × ENGINEERING",
+    "Interconnected gameplay systems",
+    "Systems focus",
+    "Previous image",
+    "Next image",
+    "Open image at full size",
+    "Gallery thumbnails",
+    "Close image preview",
+    'aria-label="Show image ',
+    "<span>Menu</span>",
+    ">Production<",
+    "01 / EMAIL",
+    ">EMAIL ↗<",
+]
+for page in bilingual_pages:
+    html = (Path("dist/es") / page).read_text(encoding="utf-8")
+    leftovers = [token for token in ES_FORBIDDEN if token in html]
+    if leftovers:
+        raise SystemExit(f"Untranslated ES text remains in {page}: {leftovers}")
+
 PY
