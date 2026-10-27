@@ -891,7 +891,7 @@ ES_EXACT = {
     "REAL PROJECT MATERIAL / SELECTED WORK":"MATERIAL REAL DE PROYECTO / TRABAJO DESTACADO",
 
     # Home
-    "DESIGN THINKING.":"DISEÑO CON CRITERIO.",
+    "DESIGN THINKING.":"DISEÑO.",
     "TECHNICAL EXECUTION.":"EJECUCIÓN TÉCNICA.",
     "Recruiter shortcut":"Acceso rápido",
     "START WITH THE SIGNAL.":"EMPIEZA POR LO ESENCIAL.",
@@ -928,7 +928,7 @@ ES_EXACT = {
 
     # Credits listing
     "COMMERCIAL":"CRÉDITOS",
-    "CREDITS.":"COMERCIALES.",
+    "CREDITS.":"PROFESIONALES.",
     "FULL PRODUCTION":"PRODUCCIÓN COMPLETA",
     "TARGETED QA SUPPORT":"SOPORTE QA PUNTUAL",
     "EARLY BETA QA":"QA EN BETA TEMPRANA",
@@ -936,8 +936,8 @@ ES_EXACT = {
     # About / contact
     "About / Pedro Pinczura":"Sobre mí / Pedro Pinczura",
     "What I do":"Qué hago",
-    "THREE SIDES OF":"TRES CARAS DE",
-    "THE SAME PROBLEM.":"UN MISMO PROBLEMA.",
+    "THREE SIDES OF":"TRES DISCIPLINAS.",
+    "THE SAME PROBLEM.":"UN MISMO PERFIL.",
     "Gameplay & Systems Design":"Diseño de gameplay y sistemas",
     "Technical Implementation":"Implementación técnica",
     "QA-informed Development":"Desarrollo guiado por QA",
@@ -1201,9 +1201,9 @@ ES_PHRASES = [
     ("Explore the rest of my personal work across different genres, gameplay systems and technical experiments.",
      "Explora el resto de mis proyectos personales entre distintos géneros, sistemas de gameplay y experimentos técnicos."),
     ("NBA BOUNCE, Barbie Horse Trails, DayZ, Chicken Run and The Cat in the Hat — with contribution scope made explicit on every page.",
-     "NBA BOUNCE, Barbie Horse Trails, DayZ, Chicken Run y The Cat in the Hat, con el alcance de mi contribución explicado de forma explícita en cada página."),
+     "Créditos en NBA BOUNCE, Barbie Horse Trails, DayZ, Chicken Run y The Cat in the Hat, con el alcance de mi trabajo claramente detallado."),
     ("Experience, technical focus, tools and the multidisciplinary path behind my Technical Design profile.",
-     "Experiencia, enfoque técnico, herramientas y recorrido multidisciplinar detrás de mi perfil de Technical Design."),
+     "Experiencia, enfoque técnico y herramientas que definen mi perfil como Technical Designer."),
     ("Technical Design is my main focus, but I’m also open to Game Design, Gameplay Programming, Unity / Unreal development, Functional QA and entry-level Production opportunities.",
      "Technical Design es mi enfoque principal, pero también estoy abierto a oportunidades en Game Design, Gameplay Programming, desarrollo con Unity / Unreal, Functional QA y posiciones junior de Production."),
 
