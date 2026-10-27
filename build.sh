@@ -797,6 +797,649 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+
+# ===== V18 bilingual ES layer =====
+# English routes stay untouched; Spanish lives under /es/ and shares all media/styles.
+import shutil
+
+bilingual_pages = [
+    "index.html","work.html","credits.html","about.html","contact.html",
+    "paperly.html","bandit-trail.html","kids-table.html","rpg-systems.html",
+    "survival-systems.html","nba-bounce.html","barbie-horse-trails.html",
+    "dayz.html","chicken-run-eggstraction.html",
+    "the-cat-in-the-hat-rainy-day-mayhem.html",
+]
+
+ES_EXACT = {
+    # Global navigation / UI
+    "Skip to content":"Saltar al contenido",
+    "Work":"Proyectos",
+    "Credits":"Créditos",
+    "About":"Sobre mí",
+    "Contact":"Contacto",
+    "Professional credits":"Créditos profesionales",
+    "Selected work":"Proyectos destacados",
+    "View selected work ↗":"Ver proyectos destacados ↗",
+    "Get in touch ↗":"Contactar ↗",
+    "CONTACT ↗":"CONTACTO ↗",
+    "EMAIL ↗":"EMAIL ↗",
+    "LINKEDIN ↗":"LINKEDIN ↗",
+    "About me ↗":"Sobre mí ↗",
+    "Explore credits ↗":"Ver créditos ↗",
+    "Explore case study ↗":"Ver caso de estudio ↗",
+    "Explore personal projects ↗":"Ver proyectos personales ↗",
+    "Open case study ↗":"Ver caso de estudio ↗",
+    "Open credit ↗":"Ver crédito ↗",
+    "View professional credits ↗":"Ver créditos profesionales ↗",
+    "View official game ↗":"Ver juego oficial ↗",
+    "VIEW OFFICIAL GAME ↗":"VER JUEGO OFICIAL ↗",
+    "ALL CREDITS":"TODOS LOS CRÉDITOS",
+    "ALL CREDITS ↗":"TODOS LOS CRÉDITOS ↗",
+    "ALL PROJECTS":"TODOS LOS PROYECTOS",
+    "← WORK":"← PROYECTOS",
+    "← PROFESSIONAL CREDITS":"← CRÉDITOS PROFESIONALES",
+    "← PREVIOUS CREDIT":"← CRÉDITO ANTERIOR",
+    "NEXT CREDIT →":"SIGUIENTE CRÉDITO →",
+    "← PREVIOUS PROJECT":"← PROYECTO ANTERIOR",
+    "NEXT PROJECT →":"SIGUIENTE PROYECTO →",
+    "ROLE":"ROL",
+    "ENGINE":"MOTOR",
+    "PERIOD":"PERIODO",
+    "FOCUS":"ENFOQUE",
+    "STATUS":"ESTADO",
+    "PLATFORM":"PLATAFORMA",
+    "INPUT":"CONTROL",
+    "PROJECT TYPE":"TIPO DE PROYECTO",
+    "COMPANY":"EMPRESA",
+    "YEAR":"AÑO",
+    "INVOLVEMENT":"PARTICIPACIÓN",
+    "DEVELOPER":"DESARROLLADOR",
+    "PUBLISHER":"EDITOR",
+    "Contribution":"Contribución",
+    "Scope":"Alcance",
+    "Workflow":"Flujo de trabajo",
+    "Official media":"Material oficial",
+    "Official trailers":"Tráilers oficiales",
+    "Professional credit":"Crédito profesional",
+    "Featured":"Destacados",
+    "Personal projects":"Proyectos personales",
+    "Languages":"Idiomas",
+    "Next":"Siguiente",
+    "MAIN":"PRINCIPAL",
+    "TESTED":"PROBADO",
+    "All":"Todos",
+    "Showing all 3 personal projects.":"Mostrando los 3 proyectos personales.",
+    "Case Study In Progress":"Caso de estudio en preparación",
+    "PROJECT COLLECTION":"COLECCIÓN DE PROYECTOS",
+    "ONGOING COLLECTION":"COLECCIÓN EN DESARROLLO",
+    "PUBLIC BUILD":"BUILD PÚBLICA",
+    "FULL PRODUCTION":"PRODUCCIÓN COMPLETA",
+    "TARGETED QA SUPPORT":"SOPORTE QA PUNTUAL",
+    "EARLY BETA QA":"QA EN BETA TEMPRANA",
+    "ADDITIONAL CONTENT QA":"QA DE CONTENIDO ADICIONAL",
+    "PRIMARY FOCUS":"ENFOQUE PRINCIPAL",
+    "IMPLEMENTATION":"IMPLEMENTACIÓN",
+    "METHOD":"MÉTODO",
+    "CORE DISCIPLINE":"DISCIPLINA PRINCIPAL",
+    "ADDITIONAL VALUE":"VALOR ADICIONAL",
+    "COMMUNICATION":"COMUNICACIÓN",
+    "CREDITS":"CRÉDITOS",
+    "COMMERCIAL CREDITS":"CRÉDITOS COMERCIALES",
+    "WORKING LANGUAGE":"IDIOMA DE TRABAJO",
+    "PRIMARY STACK":"STACK PRINCIPAL",
+    "REAL PROJECT MATERIAL / SELECTED WORK":"MATERIAL REAL DE PROYECTO / TRABAJO DESTACADO",
+
+    # Home
+    "DESIGN THINKING.":"DISEÑO CON CRITERIO.",
+    "TECHNICAL EXECUTION.":"EJECUCIÓN TÉCNICA.",
+    "Recruiter shortcut":"Acceso rápido",
+    "START WITH THE SIGNAL.":"EMPIEZA POR LO ESENCIAL.",
+    "END-TO-END DEVELOPMENT":"DESARROLLO END-TO-END",
+    "COMMERCIAL PRODUCTION":"PRODUCCIÓN COMERCIAL",
+    "PROJECTS WITH":"PROYECTOS CON",
+    "REAL OWNERSHIP.":"RESPONSABILIDAD REAL.",
+    "Profile":"Perfil",
+    "DESIGN ×":"DISEÑO ×",
+    "ENGINEERING":"INGENIERÍA",
+    "OPEN TO GAME":"ABIERTO A OPORTUNIDADES",
+    "DEVELOPMENT ROLES.":"EN DESARROLLO DE VIDEOJUEGOS.",
+    "5 titles":"5 títulos",
+    "English C1":"Inglés C1",
+    "01 / Featured project":"01 / Proyecto destacado",
+    "02 / Featured project":"02 / Proyecto destacado",
+    "03 / Project collection":"03 / Colección de proyectos",
+    "Systems, genres & experiments":"Sistemas, géneros y experimentos",
+    "Educational games & interactive systems":"Juegos educativos y sistemas interactivos",
+    "Original infinite runner / shooter":"Infinite runner / shooter original",
+    "Explore personal projects ↗":"Ver proyectos personales ↗",
+
+    # Work
+    "DESIGN.":"DISEÑA.",
+    "BUILD. ITERATE.":"CONSTRUYE. ITERA.",
+    "SELECTED CASE STUDIES.":"CASOS DE ESTUDIO DESTACADOS.",
+    "SYSTEMS, GENRES":"SISTEMAS, GÉNEROS",
+    "& EXPERIMENTS.":"Y EXPERIMENTOS.",
+    "Flight, game feel & progression":"Vuelo, game feel y progresión",
+    "Combat, inventory, dialogue, quests & abilities":"Combate, inventario, diálogo, misiones y habilidades",
+    "Crafting, building, AI & persistence":"Crafteo, construcción, IA y persistencia",
+    "Project overview available · full case study coming soon.":"Resumen disponible · caso de estudio completo próximamente.",
+    "Gameplay Systems":"Sistemas de gameplay",
+
+    # Credits listing
+    "COMMERCIAL":"CRÉDITOS",
+    "CREDITS.":"COMERCIALES.",
+    "FULL PRODUCTION":"PRODUCCIÓN COMPLETA",
+    "TARGETED QA SUPPORT":"SOPORTE QA PUNTUAL",
+    "EARLY BETA QA":"QA EN BETA TEMPRANA",
+
+    # About / contact
+    "About / Pedro Pinczura":"Sobre mí / Pedro Pinczura",
+    "What I do":"Qué hago",
+    "THREE SIDES OF":"TRES CARAS DE",
+    "THE SAME PROBLEM.":"UN MISMO PROBLEMA.",
+    "Gameplay & Systems Design":"Diseño de gameplay y sistemas",
+    "Technical Implementation":"Implementación técnica",
+    "QA-informed Development":"Desarrollo guiado por QA",
+    "Design → implementation":"Diseño → implementación",
+    "BRIDGING BOTH SIDES.":"UNIENDO DISEÑO Y TÉCNICA.",
+    "Experience snapshot":"Experiencia",
+    "FROM PROTOTYPES":"DE PROTOTIPOS",
+    "TO SHIPPED GAMES.":"A JUEGOS PUBLICADOS.",
+    "Core stack":"Stack principal",
+    "TOOLS I WORK WITH":"HERRAMIENTAS DE TRABAJO",
+    "WORKING ACROSS TEAMS":"TRABAJANDO ENTRE EQUIPOS",
+    "Native":"Nativo",
+    "C1 / Advanced":"C1 / Avanzado",
+    "Elementary":"Básico",
+    "LET'S BUILD SOMETHING PLAYABLE.":"HAGAMOS ALGO JUGABLE.",
+    "Contact / Pedro Pinczura":"Contacto / Pedro Pinczura",
+    "LET'S BUILD":"HAGAMOS",
+    "SOMETHING PLAYABLE.":"ALGO JUGABLE.",
+    "Download résumé":"Descargar CV",
+
+    # PAPERly
+    "Design goal":"Objetivo de diseño",
+    "ARCADE FLIGHT.":"VUELO ARCADE.",
+    "NOT A SCRIPTED RIDE.":"NO UN RECORRIDO PREFIJADO.",
+    "Core gameplay loop":"Bucle principal",
+    "LAUNCH. FLY.":"LANZA. VUELA.",
+    "COME BACK STRONGER.":"VUELVE MÁS LEJOS.",
+    "Launch":"Lanzamiento",
+    "Fly":"Vuelo",
+    "Distance":"Distancia",
+    "Earn":"Recompensa",
+    "Upgrade & Retry":"Mejora y repite",
+    "Gameplay systems":"Sistemas de gameplay",
+    "SYSTEMS THAT":"SISTEMAS QUE",
+    "SHAPE THE FLIGHT.":"DEFINEN EL VUELO.",
+    "CUSTOM FLIGHT MODEL":"MODELO DE VUELO PERSONALIZADO",
+    "MOBILE STEERING":"CONTROL MÓVIL",
+    "VORTEX INTERACTION":"INTERACCIÓN CON VÓRTICES",
+    "PROGRESSION":"PROGRESIÓN",
+    "GAME FEEL LAYER":"CAPA DE GAME FEEL",
+    "Technical breakdown":"Desglose técnico",
+    "SMALL SYSTEMS.":"SISTEMAS PEQUEÑOS.",
+    "CLEAR RESPONSIBILITIES.":"RESPONSABILIDADES CLARAS.",
+    "Designer-facing tuning":"AJUSTE PARA DISEÑO",
+    "TUNABLE":"AJUSTABLE",
+    "BY DESIGN.":"POR DISEÑO.",
+    "Launch interaction":"Interacción de lanzamiento",
+    "TIMING BECOMES":"EL TIMING SE CONVIERTE EN",
+    "FEEL.":"SENSACIÓN.",
+    "Mechanic + feedback":"Mecánica + feedback",
+    "THE VORTEX":"EL VÓRTICE",
+    "CHANGES THE RUN.":"CAMBIA LA PARTIDA.",
+    "Iteration":"Iteración",
+    "FIX THE FEEL,":"ARREGLA LA SENSACIÓN,",
+    "NOT JUST THE BUG.":"NO SOLO EL BUG.",
+    "WORLD SAFETY":"SEGURIDAD DEL MUNDO",
+    "Built for the phone":"Diseñado para móvil",
+    "BUILT FOR":"DISEÑADO PARA",
+    "THE PHONE.":"EL MÓVIL.",
+    "GAME VIEW.":"GAME VIEW.",
+    "SCENE VIEW.":"SCENE VIEW.",
+    "Current state":"Estado actual",
+
+    # Bandit Trail
+    "Original gameplay, public release and player-driven iteration.":"Gameplay original, lanzamiento público e iteración guiada por jugadores.",
+    "Gameplay systems":"Sistemas de gameplay",
+    "Visual archive":"Archivo visual",
+    "THE RUN,":"LA PARTIDA,",
+    "UP CLOSE.":"DE CERCA.",
+
+    # KIDS'TABLE
+    "PROFESSIONAL / UNITY":"PROFESIONAL / UNITY",
+    "DESIGN → CODE → DELIVERY":"DISEÑO → CÓDIGO → ENTREGA",
+    "PRODUCT IN USE.":"PRODUCTO EN USO.",
+
+    # RPG / Survival
+    "CONNECTED, NOT ISOLATED.":"CONECTADOS, NO AISLADOS.",
+    "SURVIVAL AS A SYSTEM NETWORK.":"SUPERVIVENCIA COMO RED DE SISTEMAS.",
+
+    # Professional credit common
+    "WHAT I WORKED ON":"EN QUÉ TRABAJÉ",
+    "SIX PLATFORMS.":"SEIS PLATAFORMAS.",
+    "ONE QUALITY BAR.":"UN MISMO NIVEL DE CALIDAD.",
+    "CROSS-PLATFORM.":"MULTIPLATAFORMA.",
+    "RULES & CONTENT":"REGLAS Y CONTENIDO",
+    "VALIDATION.":"VALIDACIÓN.",
+    "CROSS-PLATFORM,":"MULTIPLATAFORMA,",
+    "IN ENGLISH.":"EN INGLÉS.",
+    "Gameplay & design feedback":"Feedback de gameplay y diseño",
+    "BEYOND":"MÁS ALLÁ DE",
+    "BUG FINDING.":"ENCONTRAR BUGS.",
+    "Shot feel":"Sensación de tiro",
+    "Gameplay exploits":"Exploits de gameplay",
+    "Alley-oop flow":"Flujo del alley-oop",
+    "GAMEPLAY":"GAMEPLAY",
+    "GALLERY.":"GALERÍA.",
+    "WATCH THE":"VER EL",
+    "GAME IN MOTION.":"JUEGO EN MOVIMIENTO.",
+    "Launch Trailer":"Tráiler de lanzamiento",
+    "Announcement Trailer":"Tráiler de anuncio",
+    "Gameplay Trailer":"Tráiler de gameplay",
+    "Gameplay Reveal":"Presentación de gameplay",
+    "Open-world UX":"UX de mundo abierto",
+    "NAVIGATION &":"NAVEGACIÓN Y",
+    "UI clarity":"Claridad de UI",
+    "Mission flow":"Flujo de misiones",
+    "World navigation":"Navegación del mundo",
+    "Primary test target":"Plataforma principal de pruebas",
+    "TEST ENVIRONMENT.":"ENTORNO DE PRUEBAS.",
+    "Combat content QA":"QA de contenido de combate",
+    "WEAPONS, EQUIPMENT":"ARMAS, EQUIPAMIENTO",
+    "& ITEMS.":"Y OBJETOS.",
+    "State coverage":"Cobertura de estados",
+    "ANIMATIONS THROUGH":"ANIMACIONES DURANTE",
+    "MOVEMENT.":"EL MOVIMIENTO.",
+    "· IN ENGLISH.":"· EN INGLÉS.",
+    "Test targets":"Plataformas probadas",
+    "TARGETED COVERAGE":"COBERTURA PUNTUAL",
+    "ACROSS THREE BUILDS.":"EN TRES BUILDS.",
+    "CHARACTERS, MISSIONS":"PERSONAJES, MISIONES",
+    "& PROGRESSION.":"Y PROGRESIÓN.",
+    "Contribution scope":"Alcance de la contribución",
+    "FOCUSED SUPPORT.":"SOPORTE CONCRETO.",
+    "CLEAR OWNERSHIP.":"ALCANCE CLARO.",
+    "Test target":"Plataforma probada",
+    "EARLY-BETA VALIDATION":"VALIDACIÓN EN BETA TEMPRANA",
+    "ON STEAM.":"EN STEAM.",
+    "Early beta QA":"QA en beta temprana",
+    "TESTING A":"PROBANDO UN",
+    "MOVING TARGET.":"OBJETIVO EN MOVIMIENTO.",
+    "TARGETED NEW-CONTENT":"SOPORTE PUNTUAL A",
+    "SUPPORT.":"CONTENIDO NUEVO.",
+    "MINIGAMES":"MINIJUEGOS",
+    "& GAMEPLAY.":"Y GAMEPLAY.",
+    "Mini Trailer":"Mini tráiler",
+}
+
+ES_PHRASES = [
+    # Home
+    ("Technical Designer with hands-on experience across game design, Unity / C#, Unreal / Blueprints and Functional QA. I build gameplay systems, prototype quickly, iterate from player feedback and support commercial production.",
+     "Technical Designer con experiencia práctica en diseño de juego, Unity / C#, Unreal / Blueprints y Functional QA. Desarrollo sistemas de gameplay, prototipo con rapidez, itero a partir del feedback de jugadores y trabajo dentro de producción comercial."),
+    ("Three fast entry points into the work that best represents my range across Technical Design, end-to-end development and commercial QA.",
+     "Tres accesos rápidos al trabajo que mejor representa mi perfil entre Technical Design, desarrollo end-to-end y QA comercial."),
+    ("Custom flight model, touch steering, camera feel, environmental boosts and progression — built to be tuned and iterated in Unity.",
+     "Modelo de vuelo personalizado, control táctil, cámara, boosts ambientales y progresión; todo preparado para ajustar e iterar en Unity."),
+    ("Design, C# implementation, integration and coordination across a large catalogue of educational mini-games for shipped hardware.",
+     "Diseño, implementación en C#, integración y coordinación en un amplio catálogo de minijuegos educativos para hardware comercializado."),
+    ("Full-cycle, multi-platform Functional QA with gameplay feedback, licensed-content validation and direct studio communication in English.",
+     "Functional QA multiplataforma durante todo el ciclo de producción, con feedback de gameplay, validación de contenido licenciado y comunicación directa con el estudio en inglés."),
+    ("Free movement, shooting, enemy encounters and changing environments, developed from concept to public release and iterated with player feedback.",
+     "Movimiento libre, disparos, enemigos y entornos variables, desarrollado desde concepto hasta lanzamiento público e iterado con feedback de jugadores."),
+    ("End-to-end technical design, gameplay implementation and coordination across a large catalog of educational mini-games.",
+     "Technical Design end-to-end, implementación de gameplay y coordinación en un amplio catálogo de minijuegos educativos."),
+    ("Explore the rest of my personal work across different genres, gameplay systems and technical experiments.",
+     "Explora el resto de mis proyectos personales entre distintos géneros, sistemas de gameplay y experimentos técnicos."),
+    ("NBA BOUNCE, Barbie Horse Trails, DayZ, Chicken Run and The Cat in the Hat — with contribution scope made explicit on every page.",
+     "NBA BOUNCE, Barbie Horse Trails, DayZ, Chicken Run y The Cat in the Hat, con el alcance de mi contribución explicado de forma explícita en cada página."),
+    ("Experience, technical focus, tools and the multidisciplinary path behind my Technical Design profile.",
+     "Experiencia, enfoque técnico, herramientas y recorrido multidisciplinar detrás de mi perfil de Technical Design."),
+    ("Technical Design is my main focus, but I’m also open to Game Design, Gameplay Programming, Unity / Unreal development, Functional QA and entry-level Production opportunities.",
+     "Technical Design es mi enfoque principal, pero también estoy abierto a oportunidades en Game Design, Gameplay Programming, desarrollo con Unity / Unreal, Functional QA y posiciones junior de Production."),
+
+    # Work
+    ("Case studies that show how I approach gameplay, implementation, iteration and production — followed by a growing systems lab across different genres.",
+     "Casos de estudio que muestran cómo trabajo gameplay, implementación, iteración y producción, junto a una colección creciente de sistemas en distintos géneros."),
+    ("Filter the collection by the kind of work you want to inspect. Detailed write-ups are added only when there is enough public material to support them properly.",
+     "Filtra la colección por el tipo de trabajo que quieras revisar. Los análisis detallados se publican solo cuando existe suficiente material público para documentarlos correctamente."),
+    ("Design, development, playtesting and iteration.",
+     "Diseño, desarrollo, playtesting e iteración."),
+    ("Technical Design, implementation and coordination.",
+     "Technical Design, implementación y coordinación."),
+
+    # Credits listing
+    ("Professional game credits with deliberately clear contribution scopes. Open a title to see exactly what I tested, validated or contributed before following the official game links.",
+     "Créditos profesionales con un alcance de contribución deliberadamente claro. Abre cada título para ver exactamente qué probé, validé o aporté antes de acceder a los enlaces oficiales."),
+
+    # About
+    ("I’m a Technical Designer with a multidisciplinary background across game design, gameplay programming and functional QA.",
+     "Soy Technical Designer con un perfil multidisciplinar entre diseño de juego, gameplay programming y functional QA."),
+    ("Technical Design is my primary focus, but I’m open to opportunities across Game Design, Gameplay Programming, Unity / Unreal development, QA and entry-level Production. I’m most comfortable where disciplines overlap: building mechanics, exposing meaningful parameters for iteration, identifying gameplay problems and translating design intent into working systems.",
+     "Technical Design es mi enfoque principal, aunque también estoy abierto a oportunidades en Game Design, Gameplay Programming, desarrollo con Unity / Unreal, QA y Production junior. Me siento especialmente cómodo donde las disciplinas se solapan: construyendo mecánicas, exponiendo parámetros útiles para iterar, detectando problemas de gameplay y traduciendo intención de diseño a sistemas funcionales."),
+    ("I care about how a system feels in the player’s hands, but also about how clearly it can be tuned, tested, documented and maintained by a production team.",
+     "Me importa cómo se siente un sistema en manos del jugador, pero también que pueda ajustarse, probarse, documentarse y mantenerse con claridad dentro de un equipo de producción."),
+    ("Mechanics, progression, game feel, player feedback, UX and balancing decisions grounded in iteration and playtesting.",
+     "Mecánicas, progresión, game feel, feedback del jugador, UX y decisiones de balance apoyadas en iteración y playtesting."),
+    ("Hands-on implementation of gameplay systems and prototypes in Unity / C#, alongside Unreal Engine / Blueprints experience and a strong interest in gameplay programming across both engines.",
+     "Implementación directa de sistemas de gameplay y prototipos en Unity / C#, junto a experiencia con Unreal Engine / Blueprints y un fuerte interés por gameplay programming en ambos motores."),
+    ("Functional testing, bug analysis and design feedback used as part of the development loop rather than as a final validation step.",
+     "Testing funcional, análisis de bugs y feedback de diseño integrados en el ciclo de desarrollo, no únicamente como validación final."),
+    ("I started from a game-design background and progressively moved toward technical implementation. That lets me approach gameplay problems from both perspectives: what the player should experience and what the system needs to do to create that experience reliably.",
+     "Partí de una base de Game Design y fui desplazándome progresivamente hacia la implementación técnica. Eso me permite abordar problemas de gameplay desde ambos lados: qué debería experimentar el jugador y qué necesita hacer el sistema para producir esa experiencia de forma consistente."),
+    ("I enjoy building systems that can be iterated quickly, exposing useful parameters to designers and using observation, testing and feedback to improve the final result.",
+     "Disfruto construyendo sistemas que puedan iterarse rápido, exponiendo parámetros útiles para diseño y usando observación, testing y feedback para mejorar el resultado final."),
+    ("Multi-platform functional QA and gameplay / UX feedback across commercial releases including NBA BOUNCE and Barbie Horse Trails.",
+     "Functional QA multiplataforma y feedback de gameplay / UX en lanzamientos comerciales como NBA BOUNCE y Barbie Horse Trails."),
+    ("Design and implementation of educational mobile minigames, technical documentation and hands-on programming across projects from concept to final delivery.",
+     "Diseño e implementación de minijuegos educativos para móvil, documentación técnica y programación directa desde concepto hasta entrega final."),
+    ("Functional QA in English on DayZ content, with a focus on weapons, equipment, items and animation / interaction validation.",
+     "Functional QA en inglés sobre contenido de DayZ, con foco en armas, equipamiento, objetos y validación de animaciones / interacciones."),
+    ("Co-development of an original UE4 endless runner from concept through public demos, iteration and player feedback.",
+     "Co-desarrollo de un endless runner original en UE4 desde concepto hasta demos públicas, iteración y feedback de jugadores."),
+    ("Open to opportunities across game development, with a particular focus on Technical Design, Game Design and Gameplay Programming — plus Unity / Unreal development, QA and Production.",
+     "Abierto a oportunidades en desarrollo de videojuegos, con especial foco en Technical Design, Game Design y Gameplay Programming, además de desarrollo con Unity / Unreal, QA y Production."),
+
+    # Contact
+    ("I’m open to opportunities across game development, with a particular focus on Technical Design, Game Design and Gameplay Programming.",
+     "Estoy abierto a oportunidades en desarrollo de videojuegos, especialmente en Technical Design, Game Design y Gameplay Programming."),
+    ("My background spans design, programming and QA, so I’m comfortable contributing across disciplines. I’m also open to starting in Production and specialising further as I grow within a team. For opportunities or questions about my work, email or LinkedIn are the fastest ways to reach me.",
+     "Mi experiencia combina diseño, programación y QA, por lo que me siento cómodo colaborando entre disciplinas. También estoy abierto a comenzar en Production y especializarme a medida que crezca dentro de un equipo. Para oportunidades o preguntas sobre mi trabajo, email o LinkedIn son las vías más rápidas para contactarme."),
+
+    # PAPERly
+    ("A mobile arcade flight prototype built around launch timing, custom flight tuning, touch steering, environmental boosts and progression.",
+     "Un prototipo móvil de vuelo arcade construido alrededor del timing de lanzamiento, ajuste personalizado del vuelo, control táctil, boosts ambientales y progresión."),
+    ("One repeatable loop connects launch timing, flight feel, environmental boosts, rewards and upgrades.",
+     "Un bucle repetible conecta timing de lanzamiento, sensación de vuelo, boosts ambientales, recompensas y mejoras."),
+    ("The goal was to make the plane immediately readable on mobile while preserving enough momentum, descent, steering inertia and environmental interaction for each run to feel skill-based. The controller is intentionally tunable so the feel can be iterated without rebuilding the system.",
+     "El objetivo era que el avión fuese inmediatamente legible en móvil manteniendo suficiente inercia, descenso, resistencia al giro e interacción ambiental para que cada partida dependiese de la habilidad. El controlador está diseñado para ser ajustable y poder iterar el feel sin reconstruir el sistema."),
+    ("Movement, touch input, environmental boosts and progression all modify the same underlying flight model instead of behaving like disconnected features.",
+     "Movimiento, input táctil, boosts ambientales y progresión modifican el mismo modelo de vuelo base en lugar de comportarse como sistemas desconectados."),
+    ("Forward motion, vertical velocity, custom gravity, progressive speed and terminal descent are combined into a deliberately arcade-oriented controller.",
+     "Movimiento hacia delante, velocidad vertical, gravedad personalizada, velocidad progresiva y descenso terminal se combinan en un controlador deliberadamente arcade."),
+    ("Drag input passes through a dead zone, normalized distance and smoothing before affecting yaw acceleration and visual roll.",
+     "El drag pasa por una zona muerta, distancia normalizada y suavizado antes de afectar a la aceleración de yaw y al roll visual."),
+    ("Boost, fall compensation and an accumulating gravity penalty turn each vortex into a useful but non-free extension of the run.",
+     "El boost, la compensación de caída y una penalización acumulativa de gravedad convierten cada vórtice en una extensión útil de la partida, pero no gratuita."),
+    ("Power, Glide and Control upgrades directly modify launch, gravity and steering parameters.",
+     "Las mejoras de Power, Glide y Control modifican directamente parámetros de lanzamiento, gravedad y dirección."),
+    ("Pitch, roll, wobble, trails, camera tilt and dynamic FOV communicate the simulation without making the physics itself unstable.",
+     "Pitch, roll, wobble, trails, inclinación de cámara y FOV dinámico comunican la simulación sin volver inestable la física."),
+    ("The case study shows selected excerpts rather than whole scripts. The point is to expose the design logic behind the flight, not turn the portfolio into a source-code dump.",
+     "El caso de estudio muestra fragmentos seleccionados en lugar de scripts completos. El objetivo es enseñar la lógica de diseño detrás del vuelo, no convertir el portfolio en un volcado de código."),
+    ("The flight model is exposed through serialized parameters, making iteration visible and fast. The current scene tuning also demonstrates why this matters: several values have moved beyond their original script defaults as the feel evolved.",
+     "El modelo de vuelo expone sus parámetros serializados para que la iteración sea visible y rápida. El tuning actual de la escena también muestra por qué importa: varios valores han cambiado respecto a los defaults originales a medida que evolucionó el feel."),
+    ("The power bar does more than choose a number. It freezes the player's timing, classifies the outcome, changes visual treatment and delivers a short punch before handing the normalized value to the flight controller.",
+     "La barra de potencia hace más que elegir un número. Congela el timing del jugador, clasifica el resultado, cambia el tratamiento visual y aplica un pequeño punch antes de enviar el valor normalizado al controlador de vuelo."),
+    ("The zone validates the current game state and cooldown, applies the gameplay change through the plane controller, then layers feedback on top of the mechanic.",
+     "La zona valida el estado actual del juego y el cooldown, aplica el cambio de gameplay a través del controlador del avión y después añade las capas de feedback sobre la mecánica."),
+    ("The follow pass was moved into LateUpdate and smoothed independently from the plane simulation so camera motion no longer fights the Rigidbody update.",
+     "El seguimiento se movió a LateUpdate y se suavizó de forma independiente a la simulación del avión para que la cámara dejase de competir con la actualización del Rigidbody."),
+    ("Visual pitch and roll were tuned separately from positional movement, allowing the plane to communicate climb, descent and steering without destabilizing the simulation.",
+     "El pitch y roll visuales se ajustaron por separado del movimiento posicional, permitiendo comunicar ascenso, descenso y dirección sin desestabilizar la simulación."),
+    ("Vortices evolved from a simple upward push into fall compensation plus a run-level gravity penalty, keeping them desirable while preserving descent pressure.",
+     "Los vórtices evolucionaron de un simple empuje vertical a compensación de caída más una penalización de gravedad por partida, manteniéndolos atractivos sin eliminar la presión del descenso."),
+    ("Bounds and terrain checks now trigger a timed warning before forcing the crash flow, avoiding silent failures when the plane leaves valid playable space.",
+     "Los checks de límites y terreno activan ahora una advertencia temporizada antes de forzar el crash, evitando fallos silenciosos cuando el avión sale del espacio jugable."),
+    ("PAPERly is designed around a vertical mobile viewport. These screens are shown in their native portrait composition instead of being cropped into landscape frames.",
+     "PAPERly está diseñado alrededor de un viewport móvil vertical. Estas pantallas se muestran en su composición portrait nativa en lugar de recortarlas dentro de marcos horizontales."),
+    ("Editor captures and gameplay states keep their own proportions here, so the implementation context stays readable without artificial zoom.",
+     "Las capturas del editor y los estados de gameplay mantienen aquí sus proporciones originales para que el contexto de implementación siga siendo legible sin zoom artificial."),
+    ("PAPERly currently connects launch timing, touch steering, custom flight, vortices, distance tracking, earnings, upgrades, skins, records, settings and map-safety handling into one repeatable mobile loop. Gameplay video and additional iteration footage can be added later without changing the structure of this case study.",
+     "PAPERly conecta actualmente timing de lanzamiento, control táctil, vuelo personalizado, vórtices, distancia, ganancias, mejoras, skins, récords, ajustes y seguridad del mapa en un único bucle móvil repetible. Se podrán añadir vídeos de gameplay y más material de iteración sin cambiar la estructura del caso de estudio."),
+
+    # Bandit Trail
+    ("Original infinite runner / shooter combining free movement, combat, enemy encounters and changing environments.",
+     "Infinite runner / shooter original que combina movimiento libre, combate, encuentros con enemigos y entornos variables."),
+    ("Instead of restricting the player to fixed lanes or simple obstacle avoidance, we wanted each run to give the player more agency. Bandit Trail combines free movement, shooting, enemies and changing environments to create a more active take on the infinite-runner formula.",
+     "En lugar de limitar al jugador a carriles fijos o simple esquiva de obstáculos, queríamos que cada partida ofreciese más agencia. Bandit Trail combina movimiento libre, disparos, enemigos y entornos cambiantes para crear una versión más activa de la fórmula infinite runner."),
+    ("Each system supports the same goal: keeping movement, decision-making and combat active inside a continuous run.",
+     "Cada sistema persigue el mismo objetivo: mantener movimiento, toma de decisiones y combate activos dentro de una partida continua."),
+    ("The runner format is opened up beyond fixed lanes, allowing the player to move freely through the playable space while reacting to obstacles and threats.",
+     "El formato runner se abre más allá de los carriles fijos, permitiendo al jugador moverse libremente por el espacio jugable mientras reacciona a obstáculos y amenazas."),
+    ("Ranged combat is integrated directly into the running loop, so navigation and combat happen at the same time.",
+     "El combate a distancia se integra directamente en el bucle de carrera, haciendo que navegación y combate ocurran al mismo tiempo."),
+    ("Armed enemies introduce active threats beyond environmental obstacles.",
+     "Los enemigos armados introducen amenazas activas más allá de los obstáculos del entorno."),
+    ("Runs take place across procedurally generated maps with changing obstacle layouts and environmental variation.",
+     "Las partidas se desarrollan en mapas generados proceduralmente con distribuciones variables de obstáculos y cambios de entorno."),
+    ("Dollars and Wanted Level feed into unlockable weapons and character skins.",
+     "Los dólares y el Wanted Level alimentan el desbloqueo de armas y skins de personaje."),
+    ("Bandit Trail began as the final project for a university course, but development continued after the original submission. Jorge León Elías and I worked collaboratively across design, implementation, integration, testing and iteration instead of dividing the project into isolated disciplines.",
+     "Bandit Trail comenzó como proyecto final de una asignatura universitaria, pero el desarrollo continuó tras la entrega. Jorge León Elías y yo trabajamos de forma colaborativa entre diseño, implementación, integración, testing e iteración, en lugar de dividir el proyecto en disciplinas aisladas."),
+    ("We released free playable builds and shared the project through public development channels so external players could test it and suggest gameplay improvements. That made the project an exercise in publishing and user-driven iteration rather than a closed academic prototype.",
+     "Publicamos builds jugables gratuitas y compartimos el proyecto en canales públicos de desarrollo para que jugadores externos pudiesen probarlo y sugerir mejoras de gameplay. Eso convirtió el proyecto en un ejercicio de publicación e iteración guiada por usuarios, no en un prototipo académico cerrado."),
+    ("The Windows build remains publicly downloadable on itch.io. The project page also preserves public player comments and the gameplay trailer, giving the case study a verifiable record of the release and feedback process.",
+     "La build de Windows sigue disponible públicamente en itch.io. La página conserva comentarios de jugadores y el tráiler de gameplay, dejando un registro verificable del lanzamiento y del proceso de feedback."),
+    ("Bandit Trail was created from zero together with Jorge León Elías. We shared the same responsibilities and worked across the whole project, supporting each other in design, programming, art and animation integration, testing and iteration.",
+     "Bandit Trail fue creado desde cero junto a Jorge León Elías. Compartimos responsabilidades y trabajamos sobre todo el proyecto, apoyándonos en diseño, programación, integración de arte y animación, testing e iteración."),
+    ("Both of us contributed to the design and implementation of the gameplay and to taking the project from an academic starting point to a publicly playable release.",
+     "Ambos contribuimos al diseño e implementación del gameplay y a llevar el proyecto desde un punto de partida académico hasta un lanzamiento públicamente jugable."),
+
+    # KIDS'TABLE
+    ("Professional Technical Design and Lead Programming across educational mini-games and interactive systems.",
+     "Technical Design profesional y Lead Programming en minijuegos educativos y sistemas interactivos."),
+    ("KIDS'TABLE is an interactive children's table combining a large touchscreen with educational applications and video content. Public product material describes more than 150 educational applications aimed at children from 3 to 9 years old.",
+     "KIDS'TABLE es una mesa interactiva infantil que combina una gran pantalla táctil con aplicaciones educativas y contenido de vídeo. El material público del producto describe más de 150 aplicaciones educativas dirigidas a niños de 3 a 9 años."),
+    ("Working in a small-company environment meant covering gameplay and interaction design, hands-on C# programming, technical decisions, integration, iteration and coordination with external programmers. I designed a large portion of the mini-games and programmed approximately 90% of the mini-games on the table, taking many of them from initial concept through implementation and final delivery.",
+     "Trabajar en una empresa pequeña implicaba cubrir diseño de gameplay e interacción, programación directa en C#, decisiones técnicas, integración, iteración y coordinación con programadores externos. Diseñé una gran parte de los minijuegos y programé aproximadamente el 90% de los minijuegos de la mesa, llevando muchos desde concepto inicial hasta implementación y entrega final."),
+    ("The project repeatedly required moving between design intent and implementation: defining how an educational interaction should behave, translating it into a playable system, testing it on the target hardware and iterating until it was ready to ship.",
+     "El proyecto exigía moverse continuamente entre intención de diseño e implementación: definir cómo debía comportarse una interacción educativa, traducirla a un sistema jugable, probarla en el hardware objetivo e iterar hasta dejarla lista para publicar."),
+    ("A deeper breakdown of selected mini-games, systems and implementation decisions will be added once the remaining development material has been gathered.",
+     "Se añadirá un análisis más profundo de minijuegos, sistemas y decisiones de implementación seleccionadas cuando esté reunido el material de desarrollo restante."),
+    ("Public-facing product imagery already gives the project a strong visual layer. Selected gameplay breakdowns can be added later without changing this structure.",
+     "El material público del producto ya aporta una capa visual sólida. Más adelante podrán añadirse análisis de gameplay concretos sin cambiar esta estructura."),
+
+    # RPG / Survival
+    ("A personal Unity project connecting combat, inventory, dialogue, quests, shops and abilities into a cohesive RPG prototype.",
+     "Proyecto personal en Unity que conecta combate, inventario, diálogo, misiones, tiendas y habilidades dentro de un prototipo RPG cohesionado."),
+    ("Combat, inventory, dialogue, quests, shops and abilities are treated as parts of the same player progression loop. The full case study is currently being prepared for publication. A deeper breakdown with selected gameplay, implementation details and technical material will be added shortly.",
+     "Combate, inventario, diálogo, misiones, tiendas y habilidades se tratan como partes del mismo bucle de progresión del jugador. El caso de estudio completo está en preparación y próximamente se añadirá un desglose más profundo con gameplay, detalles de implementación y material técnico."),
+    ("A survival prototype connecting player needs, inventory, resource gathering, crafting, base building, NPC combat and save/load systems.",
+     "Prototipo de supervivencia que conecta necesidades del jugador, inventario, recolección de recursos, crafting, construcción de base, combate con NPC y sistemas de guardado/carga."),
+    ("Player survival mechanics, inventory, resource gathering, crafting, construction, NPC AI and combat, persistence and environment prototyping form the core of the project. The full case study is currently being prepared for publication. A deeper breakdown with selected gameplay, implementation details and technical material will be added shortly.",
+     "Mecánicas de supervivencia, inventario, recolección, crafting, construcción, IA y combate de NPC, persistencia y prototipado de entorno forman el núcleo del proyecto. El caso de estudio completo está en preparación y próximamente se añadirá un desglose más profundo con gameplay, implementación y material técnico."),
+
+    # NBA
+    ("Full-cycle functional QA across console and PC builds, with cross-platform regression, bug reporting and verification, licensed-content validation, and gameplay/design feedback shared directly with the development studio in English.",
+     "Functional QA durante todo el ciclo de producción en builds de consola y PC, con regresión multiplataforma, reporte y verificación de bugs, validación de contenido licenciado y feedback de gameplay/diseño compartido directamente con el estudio en inglés."),
+    ("I worked on NBA BOUNCE throughout the full production cycle, testing builds across console and PC, reproducing and classifying issues, validating fixes and feeding gameplay observations back to the development studio.",
+     "Trabajé en NBA BOUNCE durante todo el ciclo de producción, probando builds de consola y PC, reproduciendo y clasificando incidencias, validando fixes y trasladando observaciones de gameplay al estudio."),
+    ("This page is intentionally scoped to my contribution. It does not imply ownership of the wider game or work completed by the development team outside my QA and design-feedback role.",
+     "Esta página limita deliberadamente el alcance a mi contribución. No implica autoría sobre el juego completo ni sobre el trabajo realizado por el equipo de desarrollo fuera de mi función de QA y feedback de diseño."),
+    ("My main day-to-day focus was Nintendo Switch, PlayStation 5 and Steam, while still validating behaviour across the wider project matrix.",
+     "Mi foco diario principal fue Nintendo Switch, PlayStation 5 y Steam, aunque también validé comportamiento en el resto de la matriz de plataformas."),
+    ("Testing also involved checking behaviour against official NBA rules and reviewing licensed presentation details. I reported gameplay cases that conflicted with expected basketball rules while also validating visual elements such as team identities, colours, courts and mascots.",
+     "El testing también incluía comprobar comportamientos frente a las reglas oficiales de la NBA y revisar detalles de presentación licenciados. Reporté casos de gameplay que entraban en conflicto con reglas esperadas del baloncesto y validé elementos visuales como identidades de equipos, colores, pistas y mascotas."),
+    ("Bug reports, classifications, verification work and communication with the external development studio were handled in English throughout production.",
+     "Los reportes de bugs, clasificaciones, verificaciones y la comunicación con el estudio externo se realizaron en inglés durante toda la producción."),
+    ("Alongside functional QA, I raised gameplay-focused observations where edge cases, animation flow or shot behaviour affected the intended arcade feel.",
+     "Además del functional QA, trasladé observaciones centradas en gameplay cuando casos límite, flujo de animaciones o comportamiento de tiro afectaban al feel arcade previsto."),
+    ("Reviewed awkward shooting situations such as attempts from behind the basket or from extreme angles, and provided feedback when the result felt inconsistent with the intended arcade basketball experience.",
+     "Revisé situaciones de tiro poco naturales, como intentos desde detrás de la canasta o ángulos extremos, y aporté feedback cuando el resultado no encajaba con la experiencia arcade prevista."),
+    ("Identified edge cases where specific combinations of sprint speed, shot-meter timing and very long-distance attempts could produce overly reliable rebounds and baskets.",
+     "Identifiqué casos límite donde determinadas combinaciones de velocidad de sprint, timing del medidor y tiros desde muy lejos podían producir rebotes y canastas excesivamente fiables."),
+    ("Suggested making the aerial catch-to-dunk sequence feel smoother and more expressive, including additional aerial movement or freestyle before the finish.",
+     "Propuse hacer más fluida y expresiva la secuencia de recepción aérea y mate, incluyendo movimiento o freestyle adicional antes de finalizar."),
+    ("Public promotional screenshots give visual context to the commercial title I tested. Click any image to expand it.",
+     "Las capturas promocionales públicas aportan contexto visual al título comercial que probé. Pulsa cualquier imagen para ampliarla."),
+
+    # Barbie
+    ("Full-cycle functional QA across console and PC builds, with cross-platform regression, bug reporting and verification, plus gameplay and UX feedback focused on interface clarity, world navigation and mission progression.",
+     "Functional QA durante todo el ciclo de producción en consola y PC, con regresión multiplataforma, reporte y verificación de bugs, además de feedback de gameplay y UX centrado en claridad de interfaz, navegación y progresión de misiones."),
+    ("I worked across the full production cycle, testing console and PC builds, reproducing and classifying issues, validating fixes and sharing gameplay and UX observations directly with the US-based development studio in English.",
+     "Trabajé durante todo el ciclo de producción probando builds de consola y PC, reproduciendo y clasificando incidencias, validando fixes y compartiendo observaciones de gameplay y UX directamente con el estudio estadounidense en inglés."),
+    ("My day-to-day focus was Nintendo Switch, PlayStation 5 and Steam, while I also validated behaviour across the wider project test matrix.",
+     "Mi foco diario fue Nintendo Switch, PlayStation 5 y Steam, aunque también validé comportamiento en el resto de la matriz de pruebas."),
+    ("Because the game is built around exploring Canterbury Trails Park, part of my feedback focused on how players move between objectives. I reviewed mission routes, repeated travel and UI friction, then raised suggestions intended to keep exploration readable without unnecessary backtracking.",
+     "Como el juego gira alrededor de explorar Canterbury Trails Park, parte de mi feedback se centró en cómo se desplaza el jugador entre objetivos. Revisé rutas de misión, recorridos repetidos y fricción de UI, proponiendo cambios para mantener una exploración clara sin backtracking innecesario."),
+    ("Testing, bug reports, classifications, verification work and direct communication with the US-based development studio were handled in English throughout production.",
+     "Testing, reportes de bugs, clasificaciones, verificaciones y comunicación directa con el estudio estadounidense se realizaron en inglés durante toda la producción."),
+    ("Alongside functional QA, I provided UX and gameplay feedback aimed at reducing friction in a large explorable environment and keeping mission progression clear and comfortable for the player.",
+     "Además del functional QA, aporté feedback de UX y gameplay orientado a reducir fricción en un entorno amplio y mantener clara y cómoda la progresión de misiones."),
+    ("Flagged interface elements that felt overly aggressive or visually intrusive when they obstructed the player or competed too strongly with the gameplay view.",
+     "Señalé elementos de interfaz demasiado agresivos o intrusivos cuando tapaban al jugador o competían en exceso con la vista de gameplay."),
+    ("Reviewed mission routes and progression where objectives could create too much backtracking, and suggested changes that made the route through the world feel more efficient.",
+     "Revisé rutas y progresión de misiones donde los objetivos generaban demasiado backtracking y propuse cambios para hacer más eficiente el recorrido por el mundo."),
+    ("Proposed shortcuts, teleports and fast-travel opportunities in key areas to reduce repetitive traversal and make navigation through the open world smoother.",
+     "Propuse atajos, teletransportes y puntos de viaje rápido en zonas clave para reducir desplazamientos repetitivos y hacer más fluida la navegación por el mundo abierto."),
+
+    # DayZ
+    ("PC / Steam functional QA focused on weapons, equipment and items around additional content planned for the game, with repeated balance and behaviour validation in a dedicated combat test environment.",
+     "Functional QA en PC / Steam centrado en armas, equipamiento y objetos relacionados con contenido adicional planificado para el juego, con validaciones repetidas de balance y comportamiento en un entorno de combate dedicado."),
+    ("My contribution was a PC / Steam QA assignment focused on weapon, equipment and item content. The work combined functional validation with repeated comparison of weapon behaviour and balance, plus animation and traversal coverage for equipped and stowed states.",
+     "Mi contribución fue una asignación de QA en PC / Steam centrada en armas, equipamiento y objetos. El trabajo combinó validación funcional con comparaciones repetidas de comportamiento y balance de armas, además de cobertura de animaciones y traversal en estados equipados y guardados."),
+    ("This page is intentionally scoped to my contribution. It does not imply ownership of DayZ or work completed by Bohemia Interactive outside my Lionbridge QA assignment.",
+     "Esta página limita deliberadamente el alcance a mi contribución. No implica autoría sobre DayZ ni sobre el trabajo realizado por Bohemia Interactive fuera de mi asignación de QA con Lionbridge."),
+    ("My contribution was focused exclusively on the Steam build, using a dedicated scenario designed to exercise weapons, targets, enemies, equipment and interaction states repeatedly and consistently.",
+     "Mi contribución se centró exclusivamente en la build de Steam, usando un escenario dedicado para probar de forma repetible y consistente armas, objetivos, enemigos, equipamiento y estados de interacción."),
+    ("The test pass covered both the new content being prepared and the wider weapon set around it. I repeatedly compared weapon behaviour and balance in a controlled scenario with different enemies and target types, while also validating equipment and item behaviour around the combat loop.",
+     "El pase de testing cubría tanto el nuevo contenido en preparación como el conjunto de armas relacionado. Comparé repetidamente comportamiento y balance de armas en un escenario controlado con distintos enemigos y tipos de objetivo, validando también equipamiento y objetos alrededor del bucle de combate."),
+    ("Validation went beyond weapon stats. I checked how weapons and equipment behaved visually when equipped or stowed and while the character changed state: climbing ladders, moving up and down slopes, jumping and traversing the environment. This exposed animation, attachment, clipping and state-transition issues that could appear only in specific movement contexts.",
+     "La validación iba más allá de las estadísticas de armas. Comprobé cómo se comportaban visualmente armas y equipamiento al estar equipados o guardados mientras el personaje cambiaba de estado: escaleras, pendientes, saltos y traversal. Esto permitía detectar problemas de animación, attachment, clipping y transiciones que solo aparecían en contextos concretos."),
+    ("The assignment was carried out through Lionbridge Warsaw as a subcontracted QA task. Testing, issue reporting and the working language for the project were all in English.",
+     "La asignación se realizó a través de Lionbridge Warsaw como tarea de QA subcontratada. El testing, los reportes y el idioma de trabajo del proyecto fueron en inglés."),
+    ("Public DayZ imagery gives visual context to the systems and content types covered by the QA assignment. Click any image to expand it.",
+     "Las imágenes públicas de DayZ aportan contexto visual a los sistemas y tipos de contenido cubiertos por la asignación de QA. Pulsa cualquier imagen para ampliarla."),
+
+    # Chicken Run
+    ("Targeted functional QA support on Steam, Nintendo Switch and PlayStation 5, focused on characters, missions, unlocks, items and progression when the wider production test effort needed additional coverage.",
+     "Soporte puntual de functional QA en Steam, Nintendo Switch y PlayStation 5, centrado en personajes, misiones, desbloqueos, objetos y progresión cuando la producción necesitaba cobertura adicional."),
+    ("My contribution was pure functional QA, joining the wider test effort when extra coverage was needed. I repeatedly validated expected game behaviour across characters, missions, unlock conditions, progression and items, reproducing issues through practical trial-and-error testing and verifying correct results.",
+     "Mi contribución fue functional QA puro, incorporándome al esfuerzo de testing cuando se necesitaba cobertura adicional. Validé repetidamente el comportamiento esperado de personajes, misiones, condiciones de desbloqueo, progresión y objetos, reproduciendo incidencias mediante pruebas prácticas y verificando los resultados correctos."),
+    ("This page is intentionally scoped to my targeted QA contribution. It does not imply full-production involvement or ownership of work completed by Aardman Animations, Outright Games or other teams on the project.",
+     "Esta página limita deliberadamente el alcance a mi contribución puntual de QA. No implica participación durante toda la producción ni autoría sobre el trabajo realizado por Aardman Animations, Outright Games u otros equipos."),
+    ("My support focused on the Steam, Nintendo Switch and PlayStation 5 builds. The assignment was deliberately scoped: I joined the QA effort when additional functional coverage was needed rather than working across the full production cycle.",
+     "Mi soporte se centró en las builds de Steam, Nintendo Switch y PlayStation 5. El alcance era deliberadamente concreto: me incorporé al equipo de QA cuando se necesitaba cobertura funcional adicional, no durante todo el ciclo de producción."),
+    ("The work was pure functional QA: repeatedly testing expected behaviour, reproducing issues and checking that characters, missions, unlock conditions and items behaved correctly. The emphasis was on practical trial-and-error coverage rather than design feedback.",
+     "El trabajo fue functional QA puro: probar repetidamente comportamiento esperado, reproducir incidencias y comprobar que personajes, misiones, desbloqueos y objetos funcionaban correctamente. El foco estaba en cobertura práctica mediante pruebas, no en feedback de diseño."),
+    ("This was a targeted support credit rather than a full-production assignment. I contributed when additional testing capacity was needed, so the page keeps the scope explicit while still documenting the commercial title and the systems I validated.",
+     "Fue un crédito de soporte puntual y no una asignación de producción completa. Contribuí cuando se necesitaba capacidad adicional de testing, por lo que la página mantiene el alcance explícito mientras documenta el título comercial y los sistemas que validé."),
+    ("Public promotional screenshots provide visual context for the characters, objectives, environments and interactions covered by the functional QA pass. Click any image to expand it.",
+     "Las capturas promocionales públicas aportan contexto visual a personajes, objetivos, entornos e interacciones cubiertos durante el pase de functional QA. Pulsa cualquier imagen para ampliarla."),
+
+    # Cat in the Hat
+    ("Targeted Functional QA on the PC / Steam build during an early beta phase, validating newly integrated content while the project was still evolving and features were continuing to enter production builds.",
+     "Functional QA puntual en la build de PC / Steam durante una fase temprana de beta, validando contenido recién integrado mientras el proyecto seguía evolucionando y nuevas funcionalidades entraban en las builds de producción."),
+    ("I joined the project during an early beta period and tested only the PC / Steam build. The assignment was focused on new-content validation: testing additions as they entered evolving builds, reproducing functional issues and checking that newly integrated features behaved correctly in the current version.",
+     "Me incorporé al proyecto durante una beta temprana y probé únicamente la build de PC / Steam. La asignación se centraba en validar contenido nuevo: probar añadidos a medida que entraban en builds en evolución, reproducir problemas funcionales y comprobar que las funcionalidades recién integradas se comportaban correctamente."),
+    ("This page is intentionally scoped to my early-beta QA contribution. It does not imply full-production involvement or ownership of work completed by Casual Brothers, Outright Games or other teams on the project.",
+     "Esta página limita deliberadamente el alcance a mi contribución de QA en beta temprana. No implica participación durante toda la producción ni autoría sobre el trabajo realizado por Casual Brothers, Outright Games u otros equipos."),
+    ("My contribution was focused exclusively on the PC / Steam build. I worked with beta builds while the project was still evolving and content was continuing to be integrated.",
+     "Mi contribución se centró exclusivamente en la build de PC / Steam. Trabajé con builds beta mientras el proyecto seguía evolucionando y continuaba integrándose contenido."),
+    ("The builds I worked with were still incomplete, with features and content being added progressively. My role was to validate newly integrated content as it arrived, reproduce functional issues and check that each new addition behaved correctly inside the current build.",
+     "Las builds con las que trabajé todavía estaban incompletas y recibían funcionalidades y contenido de forma progresiva. Mi función era validar el contenido recién integrado, reproducir problemas funcionales y comprobar que cada añadido se comportaba correctamente dentro de la build actual."),
+    ("Like my Chicken Run: Eggstraction credit, this was targeted Functional QA support rather than a full-production assignment. The focus here was specifically early-beta coverage and new-content validation on Steam.",
+     "Al igual que en Chicken Run: Eggstraction, se trató de soporte puntual de Functional QA y no de una asignación de producción completa. El foco estaba específicamente en cobertura de beta temprana y validación de contenido nuevo en Steam."),
+    ("Public promotional screenshots show the variety of minigames and multiplayer contexts surrounding the kind of evolving content being integrated during development. Click any image to expand it.",
+     "Las capturas promocionales públicas muestran la variedad de minijuegos y contextos multijugador alrededor del tipo de contenido que se integraba durante el desarrollo. Pulsa cualquier imagen para ampliarla."),
+]
+
+def translate_text_es(text):
+    stripped = text.strip()
+    if not stripped:
+        return text
+    if stripped in ES_EXACT:
+        translated = ES_EXACT[stripped]
+        return text.replace(stripped, translated)
+    result = text
+    for source, target in sorted(ES_PHRASES, key=lambda pair: len(pair[0]), reverse=True):
+        result = result.replace(source, target)
+    return result
+
+def translate_visible_es(html):
+    protected = re.compile(r'(<script\b[\s\S]*?</script>|<style\b[\s\S]*?</style>|<pre\b[\s\S]*?</pre>|<code\b[\s\S]*?</code>|<[^>]+>)', re.I)
+    parts = protected.split(html)
+    for i, part in enumerate(parts):
+        if not part.startswith("<"):
+            parts[i] = translate_text_es(part)
+    html = "".join(parts)
+
+    # Translate accessible labels and alt text without touching URLs/data.
+    def attr_translate(match):
+        return match.group(1) + translate_text_es(match.group(2)) + match.group(3)
+    html = re.sub(r'((?:alt|aria-label|title)=")([^"]*)(")', attr_translate, html)
+
+    # Spanish document semantics and shared assets one directory up.
+    html = html.replace('<html lang="en">','<html lang="es">',1)
+    html = html.replace('href="style.css"','href="../style.css"',1)
+    html = html.replace('href="Pedro-Pinczura-CV.pdf"','href="../Pedro-Pinczura-CV.pdf"')
+    html = html.replace('src="public/','src="../public/')
+    html = html.replace('href="public/','href="../public/')
+    html = html.replace('data-src="public/','data-src="../public/')
+    return html
+
+es_dir = Path("dist/es")
+es_dir.mkdir(parents=True, exist_ok=True)
+for page in bilingual_pages:
+    source = Path("dist") / page
+    target = es_dir / page
+    translated = translate_visible_es(source.read_text(encoding="utf-8"))
+    target.write_text(translated, encoding="utf-8")
+
+def add_language_toggle(path, page, spanish=False):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    if "lang-toggle" in html:
+        return
+    if spanish:
+        toggle = f'<span class="lang-toggle" aria-label="Idioma"><a href="../{page}" hreflang="en" lang="en">EN</a><span>/</span><b aria-current="true">ES</b></span>'
+        alternate = f'<link rel="alternate" hreflang="en" href="../{page}"><link rel="alternate" hreflang="es" href="{page}">'
+    else:
+        toggle = f'<span class="lang-toggle" aria-label="Language"><b aria-current="true">EN</b><span>/</span><a href="es/{page}" hreflang="es" lang="es">ES</a></span>'
+        alternate = f'<link rel="alternate" hreflang="en" href="{page}"><link rel="alternate" hreflang="es" href="es/{page}">'
+    html = html.replace('<a class="cv"', toggle + '<a class="cv"', 1)
+    html = html.replace("</head>", alternate + "</head>", 1)
+    p.write_text(html, encoding="utf-8")
+
+for page in bilingual_pages:
+    add_language_toggle(Path("dist") / page, page, spanish=False)
+    add_language_toggle(Path("dist/es") / page, page, spanish=True)
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== V18 language switch ===== */
+.lang-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 7px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.025);
+  color:#667384;
+  font:9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+}
+.lang-toggle a,
+.lang-toggle b{
+  color:inherit;
+  text-decoration:none;
+  font:inherit;
+  line-height:1;
+}
+.lang-toggle b{
+  color:#fff;
+  font-weight:700;
+}
+.lang-toggle a{
+  color:#94a3b6;
+  transition:color .2s;
+}
+.lang-toggle a:hover,
+.lang-toggle a:focus-visible{
+  color:var(--b2);
+}
+@media(max-width:720px){
+  .lang-toggle{
+    margin-top:4px;
+    align-self:flex-start;
+  }
+}
+''', encoding="utf-8")
+
 # ===== Recruiter scan emphasis pass =====
 # Add restrained emphasis inside paragraphs so recruiters can scan role, technology,
 # ownership, systems and production scope without turning the page into bold noise.
@@ -955,6 +1598,72 @@ emphasis = {
 for page, phrases in emphasis.items():
     emphasize_paragraphs(page, phrases)
 
+emphasis_es = {
+    "dist/es/index.html":[
+        "Technical Designer","Unity / C#","Unreal / Blueprints","Functional QA",
+        "sistemas de gameplay","feedback de jugadores","producción comercial",
+        "Technical Design","desarrollo end-to-end","QA comercial",
+        "modelo de vuelo personalizado","control táctil","coordinación"
+    ],
+    "dist/es/about.html":[
+        "Technical Designer","diseño de juego","gameplay programming","functional QA",
+        "Technical Design","Game Design","Gameplay Programming","Unity / C#",
+        "Unreal Engine / Blueprints","testing funcional","análisis de bugs",
+        "implementación técnica","iterarse rápido"
+    ],
+    "dist/es/contact.html":[
+        "Technical Design","Game Design","Gameplay Programming",
+        "diseño, programación y QA","Production","email o LinkedIn"
+    ],
+    "dist/es/paperly.html":[
+        "prototipo móvil de vuelo arcade","timing de lanzamiento","control táctil",
+        "boosts ambientales","progresión","modelo de vuelo base","gravedad personalizada",
+        "velocidad progresiva","zona muerta","FOV dinámico","parámetros serializados",
+        "LateUpdate","Rigidbody","vórtices","viewport móvil vertical"
+    ],
+    "dist/es/bandit-trail.html":[
+        "Infinite runner / shooter original","movimiento libre","combate",
+        "lanzamiento público","feedback de jugadores","mapas generados proceduralmente",
+        "builds jugables gratuitas","iteración guiada por usuarios"
+    ],
+    "dist/es/kids-table.html":[
+        "Technical Design","Lead Programming","minijuegos educativos","Unity / C#",
+        "programación directa en C#","aproximadamente el 90%","hardware objetivo"
+    ],
+    "dist/es/rpg-systems.html":[
+        "Proyecto personal en Unity","combate","inventario","diálogo","misiones",
+        "habilidades","bucle de progresión"
+    ],
+    "dist/es/survival-systems.html":[
+        "Prototipo de supervivencia","inventario","crafting","construcción",
+        "IA","persistencia"
+    ],
+    "dist/es/nba-bounce.html":[
+        "Functional QA","ciclo de producción","regresión multiplataforma",
+        "validación de contenido licenciado","feedback de gameplay","Nintendo Switch",
+        "PlayStation 5","Steam","casos límite"
+    ],
+    "dist/es/barbie-horse-trails.html":[
+        "Functional QA","ciclo de producción","regresión multiplataforma",
+        "feedback de gameplay y UX","Nintendo Switch","PlayStation 5","Steam",
+        "backtracking","viaje rápido"
+    ],
+    "dist/es/dayz.html":[
+        "Functional QA","PC / Steam","armas, equipamiento y objetos",
+        "balance de armas","build de Steam","escenario dedicado"
+    ],
+    "dist/es/chicken-run-eggstraction.html":[
+        "functional QA","Steam, Nintendo Switch y PlayStation 5",
+        "personajes, misiones","progresión","cobertura adicional"
+    ],
+    "dist/es/the-cat-in-the-hat-rainy-day-mayhem.html":[
+        "Functional QA","PC / Steam","beta temprana","contenido nuevo",
+        "problemas funcionales"
+    ],
+}
+for page, phrases in emphasis_es.items():
+    emphasize_paragraphs(page, phrases)
+
 css = Path("dist/style.css")
 css.write_text(css.read_text(encoding="utf-8") + r'''
 
@@ -1102,14 +1811,16 @@ def transform_kids_gallery(path):
     html = html[:m.start()] + replacement + html[m.end():]
     p.write_text(html, encoding="utf-8")
 
-transform_bandit_gallery("dist/bandit-trail.html")
-transform_kids_gallery("dist/kids-table.html")
+for gallery_page in ["dist/bandit-trail.html","dist/es/bandit-trail.html"]:
+    transform_bandit_gallery(gallery_page)
+for gallery_page in ["dist/kids-table.html","dist/es/kids-table.html"]:
+    transform_kids_gallery(gallery_page)
 for gallery_page in [
-    "dist/nba-bounce.html",
-    "dist/barbie-horse-trails.html",
-    "dist/dayz.html",
-    "dist/chicken-run-eggstraction.html",
-    "dist/the-cat-in-the-hat-rainy-day-mayhem.html",
+    "dist/nba-bounce.html","dist/es/nba-bounce.html",
+    "dist/barbie-horse-trails.html","dist/es/barbie-horse-trails.html",
+    "dist/dayz.html","dist/es/dayz.html",
+    "dist/chicken-run-eggstraction.html","dist/es/chicken-run-eggstraction.html",
+    "dist/the-cat-in-the-hat-rainy-day-mayhem.html","dist/es/the-cat-in-the-hat-rainy-day-mayhem.html",
 ]:
     transform_credit_gallery(gallery_page)
 
@@ -1195,13 +1906,13 @@ steam_script = r'''
 '''
 
 for gallery_page in [
-    "dist/bandit-trail.html",
-    "dist/kids-table.html",
-    "dist/nba-bounce.html",
-    "dist/barbie-horse-trails.html",
-    "dist/dayz.html",
-    "dist/chicken-run-eggstraction.html",
-    "dist/the-cat-in-the-hat-rainy-day-mayhem.html",
+    "dist/bandit-trail.html","dist/es/bandit-trail.html",
+    "dist/kids-table.html","dist/es/kids-table.html",
+    "dist/nba-bounce.html","dist/es/nba-bounce.html",
+    "dist/barbie-horse-trails.html","dist/es/barbie-horse-trails.html",
+    "dist/dayz.html","dist/es/dayz.html",
+    "dist/chicken-run-eggstraction.html","dist/es/chicken-run-eggstraction.html",
+    "dist/the-cat-in-the-hat-rainy-day-mayhem.html","dist/es/the-cat-in-the-hat-rainy-day-mayhem.html",
 ]:
     p = Path(gallery_page)
     html = p.read_text(encoding="utf-8")
