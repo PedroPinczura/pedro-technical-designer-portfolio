@@ -2891,4 +2891,158 @@ for page in bilingual_pages:
     es.write_text(es_html, encoding="utf-8")
 
 
+
+# ===== Microinteractions + invisible performance instrumentation =====
+# Keep layout/content untouched. Enhance only hover/focus feedback and invisible metrics.
+MICRO_CSS = r'''
+
+/* ===== Microinteractions V20 ===== */
+a.project,
+a.workcard,
+a.card,
+a.gateway,
+a.signal,
+a.showcase-tile,
+a.contact-link,
+a.primary,
+a.secondary-link,
+a.cv{
+  cursor:pointer;
+}
+
+a.project,
+a.workcard,
+a.card,
+a.gateway,
+a.signal,
+a.showcase-tile{
+  transition:
+    transform .22s cubic-bezier(.2,.75,.2,1),
+    border-color .22s ease,
+    box-shadow .22s ease,
+    filter .22s ease;
+}
+
+.micro-arrow,
+.primary>span,
+.contact-link>b{
+  display:inline-block;
+  transition:transform .18s ease,opacity .18s ease;
+  will-change:transform;
+}
+
+.case-link,
+.primary,
+.secondary-link,
+.cv,
+.contact-link{
+  transition:
+    color .18s ease,
+    border-color .18s ease,
+    background-color .18s ease,
+    box-shadow .18s ease,
+    filter .18s ease;
+}
+
+@media(hover:hover){
+  a.project:hover,
+  a.workcard:hover,
+  a.card:hover,
+  a.gateway:hover,
+  a.signal:hover,
+  a.showcase-tile:hover{
+    border-color:rgba(105,168,255,.55);
+    box-shadow:0 18px 48px rgba(0,0,0,.20);
+  }
+
+  a:hover .micro-arrow,
+  .primary:hover>span,
+  .contact-link:hover>b{
+    transform:translateX(3px);
+  }
+
+  .contact-link[href$=".pdf"]:hover>b{
+    transform:translateY(2px);
+  }
+
+  .primary:hover{
+    filter:brightness(1.07);
+    box-shadow:0 8px 24px rgba(47,128,255,.16);
+  }
+
+  .secondary-link:hover{
+    color:#fff;
+    border-color:rgba(105,168,255,.66);
+  }
+
+  .cv:hover{
+    color:#fff;
+    border-color:rgba(105,168,255,.56);
+    background:rgba(47,128,255,.07);
+  }
+
+  .contact-link:hover{
+    border-color:rgba(105,168,255,.46);
+  }
+}
+
+a.project:focus-visible,
+a.workcard:focus-visible,
+a.card:focus-visible,
+a.gateway:focus-visible,
+a.signal:focus-visible,
+a.showcase-tile:focus-visible,
+a.contact-link:focus-visible{
+  border-color:rgba(105,168,255,.72)!important;
+  box-shadow:0 0 0 1px rgba(105,168,255,.16),0 18px 48px rgba(0,0,0,.18);
+}
+
+a.lang-flag:not(.is-active):hover,
+a.lang-flag:not(.is-active):focus-visible{
+  opacity:1;
+  filter:saturate(1);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .micro-arrow,
+  .primary>span,
+  .contact-link>b{
+    transform:none!important;
+  }
+}
+'''
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + MICRO_CSS, encoding="utf-8")
+
+SPEED_INSIGHTS_SNIPPET = '''<script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments);};</script><script defer src="/_vercel/speed-insights/script.js"></script>'''
+
+def _micro_polish_html(html):
+    # Wrap only the visible arrow glyph inside CTA text so it can move independently.
+    html = re.sub(
+        r'(<span class="case-link">[^<]*?)(↗)(</span>)',
+        r'\1<span class="micro-arrow">\2</span>\3',
+        html
+    )
+    html = re.sub(
+        r'(<b>[^<]*?)\s(↗)(</b>)',
+        r'\1 <span class="micro-arrow">\2</span>\3',
+        html
+    )
+    html = re.sub(
+        r'(<a class="cv"[^>]*>[^<]*?)\s(↗)(</a>)',
+        r'\1 <span class="micro-arrow">\2</span>\3',
+        html
+    )
+    if '/_vercel/speed-insights/script.js' not in html:
+        html = html.replace("</body>", SPEED_INSIGHTS_SNIPPET + "</body>", 1)
+    return html
+
+for page in bilingual_pages:
+    for prefix in ("dist", "dist/es"):
+        p = Path(prefix) / page
+        html = p.read_text(encoding="utf-8")
+        html = _micro_polish_html(html)
+        p.write_text(html, encoding="utf-8")
+
 PY
