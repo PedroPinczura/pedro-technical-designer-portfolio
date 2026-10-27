@@ -1565,6 +1565,7 @@ ES_PAGE_POLISH = {
     "index.html":{
         "Personal Projects":"Proyectos personales",
         ">PROJECTS<":">PROYECTOS<",
+        "PUBLIC BUILD / UE4":"BUILD PÚBLICA / UE4",
     },
     "work.html":{
         "WORK / PEDRO PINCZURA":"PROYECTOS / PEDRO PINCZURA",
@@ -1611,6 +1612,8 @@ ES_PAGE_POLISH = {
     },
     "bandit-trail.html":{
         "Play / Download ↗":"Jugar / Descargar ↗",
+        "Play / Download":"Jugar / Descargar",
+        "PLAYABLE.":"JUGABLE.",
         "Watch trailer ↗":"Ver tráiler ↗",
         "PUBLIC BUILD / UE4":"BUILD PÚBLICA / UE4",
         "RUN. SHOOT.":"CORRE. DISPARA.",
@@ -1648,6 +1651,8 @@ ES_PAGE_POLISH = {
         "THE PRODUCT":"EL PRODUCTO",
         "SELECTED MINI-GAMES":"MINIJUEGOS SELECCIONADOS",
         "Cooperative play on the physical KIDS&#x27;TABLE hardware.":"Juego cooperativo en el hardware físico de KIDS&#x27;TABLE.",
+        "Cooperative play on the physical KIDS&#39;TABLE hardware.":"Juego cooperativo en el hardware físico de KIDS&#39;TABLE.",
+        "Cooperative play on the physical KIDS'TABLE hardware.":"Juego cooperativo en el hardware físico de KIDS'TABLE.",
         "BACK TO WORK ↗":"VOLVER A PROYECTOS ↗",
     },
     "rpg-systems.html":{
