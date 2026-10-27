@@ -1724,16 +1724,19 @@ for page in bilingual_pages:
     translated = apply_es_polish(translated, page)
     target.write_text(translated, encoding="utf-8")
 
+GB_FLAG = '''<svg class="flag-svg flag-gb" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><rect width="60" height="30" fill="#012169"/><path d="M0 0L60 30M60 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0L60 30M60 0L0 30" stroke="#C8102E" stroke-width="2.4"/><path d="M30 0V30M0 15H60" stroke="#fff" stroke-width="10"/><path d="M30 0V30M0 15H60" stroke="#C8102E" stroke-width="6"/></svg>'''
+ES_FLAG = '''<svg class="flag-svg flag-es" viewBox="0 0 60 30" aria-hidden="true" focusable="false"><rect width="60" height="30" fill="#AA151B"/><rect y="7.5" width="60" height="15" fill="#F1BF00"/></svg>'''
+
 def add_language_toggle(path, page, spanish=False):
     p = Path(path)
     html = p.read_text(encoding="utf-8")
     if "lang-toggle" in html:
         return
     if spanish:
-        toggle = f'<span class="lang-toggle" aria-label="Idioma"><a class="lang-flag" href="../{page}" hreflang="en" lang="en" aria-label="English" title="English">🇬🇧</a><b class="lang-flag is-active" aria-current="true" aria-label="Español" title="Español">🇪🇸</b></span>'
+        toggle = f'<span class="lang-toggle" aria-label="Idioma"><a class="lang-flag" href="../{page}" hreflang="en" lang="en" aria-label="English" title="English">{GB_FLAG}</a><span class="lang-flag is-active" aria-current="true" aria-label="Español" title="Español">{ES_FLAG}</span></span>'
         alternate = f'<link rel="alternate" hreflang="en" href="../{page}"><link rel="alternate" hreflang="es" href="{page}">'
     else:
-        toggle = f'<span class="lang-toggle" aria-label="Language"><b class="lang-flag is-active" aria-current="true" aria-label="English" title="English">🇬🇧</b><a class="lang-flag" href="es/{page}" hreflang="es" lang="es" aria-label="Español" title="Español">🇪🇸</a></span>'
+        toggle = f'<span class="lang-toggle" aria-label="Language"><span class="lang-flag is-active" aria-current="true" aria-label="English" title="English">{GB_FLAG}</span><a class="lang-flag" href="es/{page}" hreflang="es" lang="es" aria-label="Español" title="Español">{ES_FLAG}</a></span>'
         alternate = f'<link rel="alternate" hreflang="en" href="{page}"><link rel="alternate" hreflang="es" href="es/{page}">'
     html = html.replace('<a class="cv"', toggle + '<a class="cv"', 1)
     html = html.replace("</head>", alternate + "</head>", 1)
@@ -1742,12 +1745,14 @@ def add_language_toggle(path, page, spanish=False):
 def replace_home_mark(path, label):
     p = Path(path)
     html = p.read_text(encoding="utf-8")
-    # Replace only links whose complete visible content is the old "PP" mark.
-    html = re.sub(
-        r'(<a\b[^>]*>)(\s*)PP(\s*)(</a>)',
-        lambda m: m.group(1) + m.group(2) + label + m.group(3) + m.group(4),
-        html
+    html, count = re.subn(
+        r'<span class="mark">\s*PP\s*</span>',
+        f'<span class="mark home-mark">{label}</span>',
+        html,
+        count=1
     )
+    if count != 1:
+        raise SystemExit(f"Expected one PP brand mark in {path}, replaced {count}")
     p.write_text(html, encoding="utf-8")
 
 for page in bilingual_pages:
@@ -1780,18 +1785,35 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 .lang-flag{
   display:inline-grid;
   place-items:center;
-  min-width:24px;
-  min-height:22px;
-  padding:1px 2px;
+  width:32px;
+  height:24px;
+  padding:2px;
   border:1px solid transparent;
   border-radius:3px;
   opacity:.55;
   text-decoration:none;
-  font-size:16px;
   line-height:1;
-  filter:saturate(.7);
+  filter:saturate(.78);
   transition:opacity .2s,border-color .2s,filter .2s,transform .2s;
+  overflow:hidden;
 }
+.flag-svg{
+  display:block;
+  width:26px;
+  height:16px;
+  border-radius:1px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14);
+}
+.home-mark{
+  width:auto!important;
+  min-width:52px;
+  padding:0 8px;
+  font-size:9px!important;
+  font-weight:700!important;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+html[lang="es"] .home-mark{min-width:58px;}
 .lang-flag.is-active{
   opacity:1;
   border-color:rgba(255,255,255,.28);
