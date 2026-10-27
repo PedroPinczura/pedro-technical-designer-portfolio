@@ -799,6 +799,13 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 
 
 
+# DayZ workflow language clarification.
+replace(
+    "dist/dayz.html",
+    "The assignment was carried out through Lionbridge Warsaw as a subcontracted QA task. Testing, issue reporting and the working language for the project were all in English.",
+    "The assignment was carried out through Lionbridge Warsaw as a subcontracted QA task. Testing and issue reporting were handled in English, while day-to-day communication within the Warsaw team also included Polish."
+)
+
 # ===== V18 bilingual ES layer =====
 # English routes stay untouched; Spanish lives under /es/ and shares all media/styles.
 import shutil
@@ -1161,6 +1168,10 @@ ES_EXACT = {
     "The Cat in the Hat Rainy Day Mayhem painting minigame":"Minijuego de pintura",
     "The Cat in the Hat Rainy Day Mayhem four player split screen minigame":"Minijuego a pantalla dividida para cuatro jugadores",
 
+    "Licensed QA":"QA DE CONTENIDO LICENCIADO",
+    "RULES & CONTENT":"VALIDACIÓN DE",
+    "VALIDATION.":"REGLAS Y CONTENIDO.",
+    "COMMERCIAL CREDITS":"CRÉDITOS PROFESIONALES",
     "Bandit Trail character standing in a western town":"Personaje de Bandit Trail en un pueblo del oeste",
     "Bandit Trail gameplay showing the player character, enemies and HUD":"Gameplay de Bandit Trail con jugador, enemigos y HUD",
     "Bandit Trail character running through an open western environment":"Personaje corriendo por un entorno abierto del oeste",
@@ -1363,7 +1374,7 @@ ES_PHRASES = [
     ("Bug reports, classifications, verification work and communication with the external development studio were handled in English throughout production.",
      "Los reportes de bugs, clasificaciones, verificaciones y la comunicación con el estudio externo se realizaron en inglés durante toda la producción."),
     ("Alongside functional QA, I raised gameplay-focused observations where edge cases, animation flow or shot behaviour affected the intended arcade feel.",
-     "Además del functional QA, trasladé observaciones centradas en gameplay cuando casos límite, flujo de animaciones o comportamiento de tiro afectaban al feel arcade previsto."),
+     "Además del Functional QA, trasladé observaciones de gameplay cuando casos límite, transiciones de animación o comportamientos de tiro afectaban a la experiencia arcade prevista."),
     ("Reviewed awkward shooting situations such as attempts from behind the basket or from extreme angles, and provided feedback when the result felt inconsistent with the intended arcade basketball experience.",
      "Revisé situaciones de tiro poco naturales, como intentos desde detrás de la canasta o ángulos extremos, y aporté feedback cuando el resultado no encajaba con la experiencia arcade prevista."),
     ("Identified edge cases where specific combinations of sprint speed, shot-meter timing and very long-distance attempts could produce overly reliable rebounds and baskets.",
@@ -1406,8 +1417,8 @@ ES_PHRASES = [
      "El pase de testing cubría tanto el nuevo contenido en preparación como el conjunto de armas relacionado. Comparé repetidamente comportamiento y balance de armas en un escenario controlado con distintos enemigos y tipos de objetivo, validando también equipamiento y objetos alrededor del bucle de combate."),
     ("Validation went beyond weapon stats. I checked how weapons and equipment behaved visually when equipped or stowed and while the character changed state: climbing ladders, moving up and down slopes, jumping and traversing the environment. This exposed animation, attachment, clipping and state-transition issues that could appear only in specific movement contexts.",
      "La validación iba más allá de las estadísticas de armas. Comprobé cómo se comportaban visualmente armas y equipamiento al estar equipados o guardados mientras el personaje cambiaba de estado: escaleras, pendientes, saltos y traversal. Esto permitía detectar problemas de animación, attachment, clipping y transiciones que solo aparecían en contextos concretos."),
-    ("The assignment was carried out through Lionbridge Warsaw as a subcontracted QA task. Testing, issue reporting and the working language for the project were all in English.",
-     "La asignación se realizó a través de Lionbridge Warsaw como tarea de QA subcontratada. El testing, los reportes y el idioma de trabajo del proyecto fueron en inglés."),
+    ("The assignment was carried out through Lionbridge Warsaw as a subcontracted QA task. Testing and issue reporting were handled in English, while day-to-day communication within the Warsaw team also included Polish.",
+     "La asignación se realizó a través de Lionbridge Warsaw como tarea de QA subcontratada. El testing y los reportes se gestionaban en inglés, mientras que la comunicación diaria dentro del equipo de Varsovia también incluía polaco."),
     ("Public DayZ imagery gives visual context to the systems and content types covered by the QA assignment. Click any image to expand it.",
      "Las imágenes públicas de DayZ aportan contexto visual a los sistemas y tipos de contenido cubiertos por la asignación de QA. Pulsa cualquier imagen para ampliarla."),
 
@@ -1534,6 +1545,15 @@ def add_language_toggle(path, page, spanish=False):
 for page in bilingual_pages:
     add_language_toggle(Path("dist") / page, page, spanish=False)
     add_language_toggle(Path("dist/es") / page, page, spanish=True)
+
+# Spanish-only editorial fixes for layouts whose English line breaks do not translate well.
+home_es = Path("dist/es/index.html")
+home_text = home_es.read_text(encoding="utf-8")
+home_text = home_text.replace(
+    '<div class="ey">CRÉDITOS PROFESIONALES</div><h2>CRÉDITOS<br><span>CRÉDITOS</span></h2>',
+    '<div class="ey">CRÉDITOS PROFESIONALES</div><h2>TRABAJO<br><span>COMERCIAL.</span></h2>'
+)
+home_es.write_text(home_text, encoding="utf-8")
 
 css = Path("dist/style.css")
 css.write_text(css.read_text(encoding="utf-8") + r'''
