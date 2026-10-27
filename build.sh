@@ -1073,6 +1073,113 @@ ES_EXACT = {
     "MINIGAMES":"MINIJUEGOS",
     "& GAMEPLAY.":"Y GAMEPLAY.",
     "Mini Trailer":"Mini tráiler",
+
+    # V18 polish: remaining visible UI / labels
+    "View selected work":"Ver proyectos destacados",
+    "COMMERCIAL QA + DESIGN FEEDBACK":"QA COMERCIAL + FEEDBACK DE DISEÑO",
+    "UE4 / ORIGINAL PROJECT":"UE4 / PROYECTO ORIGINAL",
+    "TECHNICAL DESIGN / LEAD PROGRAMMING":"TECHNICAL DESIGN / LEAD PROGRAMMING",
+    "Build · Test · Iterate":"Construir · Probar · Iterar",
+    "UE4 / PUBLIC BUILD":"UE4 / BUILD PÚBLICA",
+    "UNITY / PROFESSIONAL":"UNITY / PROFESIONAL",
+    "UNITY / CASE STUDY IN PROGRESS":"UNITY / CASO DE ESTUDIO EN PREPARACIÓN",
+    "Custom flight model, touch steering, camera, vortices and upgrades.":"Modelo de vuelo personalizado, control táctil, cámara, vórtices y mejoras.",
+    "English production teams":"Equipos de producción en inglés",
+    "Functional QA · full production cycle · design feedback":"Functional QA · ciclo completo de producción · feedback de diseño",
+    "Functional QA · full production cycle · design / UX feedback":"Functional QA · ciclo completo de producción · feedback de diseño / UX",
+    "Functional QA · weapons, equipment & item validation":"Functional QA · validación de armas, equipamiento y objetos",
+    "Functional QA · targeted production support":"Functional QA · soporte puntual de producción",
+    "Functional QA · early beta · new content validation":"Functional QA · beta temprana · validación de contenido nuevo",
+    "PROFESSIONAL CREDITS":"CRÉDITOS PROFESIONALES",
+    "01 / DESIGN":"01 / DISEÑO",
+    "02 / IMPLEMENTATION":"02 / IMPLEMENTACIÓN",
+    "03 / ITERATION":"03 / ITERACIÓN",
+    "Balancing":"Balance",
+    "Prototyping":"Prototipado",
+    "Regression":"Regresión",
+    "Bug Analysis":"Análisis de bugs",
+    "Design Feedback":"Feedback de diseño",
+    "Documentation":"Documentación",
+    "MADRID, SPAIN":"MADRID, ESPAÑA",
+    "DESIGN × CODE × ITERATION":"DISEÑO × CÓDIGO × ITERACIÓN",
+    "LAUNCH.":"LANZA.",
+    "FLY. PUSH FURTHER.":"VUELA. LLEGA MÁS LEJOS.",
+    "Original personal project":"Proyecto personal original",
+    "Mobile / portrait":"Móvil / vertical",
+    "Touch + keyboard testing":"Táctil + teclado para testing",
+    "Flight feel / tuning / progression":"Feel de vuelo / tuning / progresión",
+    "Camera":"Cámara",
+    "Progression":"Progresión",
+    "Weak / OK / Good / Perfect feedback":"Feedback Weak / OK / Good / Perfect",
+    "Vertical boost":"Boost vertical",
+    "Fall compensation":"Compensación de caída",
+    "Capped gravity penalty":"Penalización de gravedad limitada",
+    "Audio + particles + camera shake":"Audio + partículas + camera shake",
+    "Scale punch":"Punch de escala",
+    "Jitter → LateUpdate follow":"Jitter → seguimiento en LateUpdate",
+    "Pitch direction & readable roll":"Pitch direccional y roll legible",
+    "Boost without infinite ascent":"Boost sin ascenso infinito",
+    "Leaving the terrain is a game state":"Salir del terreno es un estado de juego",
+    "Current State":"Estado actual",
+    "Scene Overview":"Vista general de escena",
+    "Vortex Scene":"Escena de vórtice",
+    "Out of Bounds":"Fuera de límites",
+
+    # Gallery captions / alt text
+    "NBA BOUNCE characters and mascots on court":"Personajes y mascotas de NBA BOUNCE en pista",
+    "NBA BOUNCE mascot dunking":"Mascota de NBA BOUNCE realizando un mate",
+    "NBA BOUNCE multiplayer gameplay on the Utah court":"Gameplay multijugador de NBA BOUNCE en la pista de Utah",
+    "NBA BOUNCE gameplay on the Milwaukee court":"Gameplay de NBA BOUNCE en la pista de Milwaukee",
+    "NBA BOUNCE gameplay on the Detroit court":"Gameplay de NBA BOUNCE en la pista de Detroit",
+    "NBA BOUNCE Dallas Mavericks mascot gameplay shot":"Gameplay con la mascota de Dallas Mavericks en NBA BOUNCE",
+    "NBA BOUNCE gameplay on the Los Angeles Lakers court":"Gameplay de NBA BOUNCE en la pista de Los Angeles Lakers",
+    "NBA BOUNCE mascot lineup":"Alineación de mascotas de NBA BOUNCE",
+    "NBA BOUNCE winner screen":"Pantalla de victoria de NBA BOUNCE",
+
+    "Barbie Horse Trails horse care and grooming":"Cuidado y cepillado del caballo en Barbie Horse Trails",
+    "Barbie Horse Trails group riding through Canterbury Trails Park":"Grupo cabalgando por Canterbury Trails Park",
+    "Barbie Horse Trails riding near a waterfall and bridge":"Cabalgando junto a una cascada y un puente",
+    "Barbie Horse Trails horse customization screen":"Pantalla de personalización del caballo",
+    "Barbie Horse Trails exploration beside a lake":"Exploración junto a un lago",
+    "Barbie Horse Trails horseback exploration":"Exploración a caballo",
+    "Barbie Horse Trails character customization footwear":"Personalización de calzado del personaje",
+    "Barbie Horse Trails character outfit customization":"Personalización de ropa del personaje",
+    "Barbie Horse Trails pottery reconstruction activity":"Actividad de reconstrucción de cerámica",
+
+    "Chicken Run Eggstraction outdoor stealth area":"Zona exterior de sigilo en Chicken Run: Eggstraction",
+    "Chicken Run Eggstraction interior stealth encounter":"Encuentro de sigilo en interior",
+    "Chicken Run Eggstraction treetop environment and traversal area":"Entorno en altura y zona de traversal",
+    "Chicken Run Eggstraction garden stealth gameplay":"Gameplay de sigilo en el jardín",
+    "Chicken Run Eggstraction water-side escape environment":"Entorno de escape junto al agua",
+
+    "The Cat in the Hat Rainy Day Mayhem basketball minigame":"Minijuego de baloncesto de The Cat in the Hat",
+    "The Cat in the Hat Rainy Day Mayhem basket carry minigame":"Minijuego de transporte de cesta",
+    "The Cat in the Hat Rainy Day Mayhem maze minigame":"Minijuego de laberinto",
+    "The Cat in the Hat Rainy Day Mayhem kitchen minigame":"Minijuego de cocina",
+    "The Cat in the Hat Rainy Day Mayhem dialogue scene":"Escena de diálogo",
+    "The Cat in the Hat Rainy Day Mayhem sorting minigame":"Minijuego de clasificación",
+    "The Cat in the Hat Rainy Day Mayhem painting minigame":"Minijuego de pintura",
+    "The Cat in the Hat Rainy Day Mayhem four player split screen minigame":"Minijuego a pantalla dividida para cuatro jugadores",
+
+    "Bandit Trail character standing in a western town":"Personaje de Bandit Trail en un pueblo del oeste",
+    "Bandit Trail gameplay showing the player character, enemies and HUD":"Gameplay de Bandit Trail con jugador, enemigos y HUD",
+    "Bandit Trail character running through an open western environment":"Personaje corriendo por un entorno abierto del oeste",
+    "Enemy outlaw firing a weapon in Bandit Trail":"Enemigo forajido disparando en Bandit Trail",
+    "Rifle-wielding enemy in Bandit Trail":"Enemigo armado con rifle en Bandit Trail",
+    "Female playable character holding a firearm in Bandit Trail":"Personaje jugable femenino con arma de fuego",
+    "Player shooting an explosive barrel in Bandit Trail":"Jugador disparando a un barril explosivo",
+    "Player running through a dry biome with large bones":"Jugador atravesando un bioma seco con grandes huesos",
+    "Player running through a greener biome in Bandit Trail":"Jugador atravesando un bioma más verde",
+    "Outlaw aiming a rifle in Bandit Trail":"Forajido apuntando con un rifle en Bandit Trail",
+
+    "Two children playing together on the yellow KIDS'TABLE":"Dos niños jugando juntos en la KIDS'TABLE amarilla",
+    "Two children interacting with a KIDS'TABLE educational activity":"Dos niños interactuando con una actividad educativa de KIDS'TABLE",
+    "Children interacting with a game on KIDS'TABLE":"Niños interactuando con un juego en KIDS'TABLE",
+    "Adult and child playing together on a red KIDS'TABLE":"Adulto y niño jugando juntos en una KIDS'TABLE roja",
+    "Yellow KIDS'TABLE hardware":"Hardware amarillo de KIDS'TABLE",
+    "Purple KIDS'TABLE hardware":"Hardware morado de KIDS'TABLE",
+    "Selection of educational applications available on KIDS'TABLE":"Selección de aplicaciones educativas disponibles en KIDS'TABLE",
+    "KIDS'TABLE branding and educational application previews":"Branding de KIDS'TABLE y previews de aplicaciones educativas",
 }
 
 ES_PHRASES = [
@@ -1371,12 +1478,42 @@ def translate_visible_es(html):
     html = html.replace('data-src="public/','data-src="../public/')
     return html
 
+ES_META = {
+    "index.html":("Pedro Pinczura — Technical Designer","Technical Designer con experiencia en diseño, gameplay programming, Unity, Unreal y Functional QA."),
+    "work.html":("Proyectos — Pedro Pinczura","Casos de estudio y proyectos de Technical Design, gameplay y sistemas de Pedro Pinczura."),
+    "credits.html":("Créditos profesionales — Pedro Pinczura","Créditos comerciales con contribuciones claramente delimitadas en QA, gameplay y feedback de diseño."),
+    "about.html":("Sobre mí — Pedro Pinczura","Perfil, experiencia, stack técnico y recorrido multidisciplinar de Pedro Pinczura como Technical Designer."),
+    "contact.html":("Contacto — Pedro Pinczura","Contacto profesional de Pedro Pinczura para oportunidades en desarrollo de videojuegos."),
+    "paperly.html":("PAPERly — Pedro Pinczura","Caso de estudio de PAPERly: vuelo arcade, control táctil, tuning, progresión y Technical Design en Unity."),
+    "bandit-trail.html":("Bandit Trail — Pedro Pinczura","Caso de estudio de Bandit Trail, infinite runner / shooter original desarrollado en Unreal Engine 4."),
+    "kids-table.html":("KIDS'TABLE — Pedro Pinczura","Technical Design y Lead Programming en juegos educativos y sistemas interactivos para KIDS'TABLE."),
+    "rpg-systems.html":("RPG Systems — Pedro Pinczura","Proyecto personal de sistemas RPG conectados en Unity."),
+    "survival-systems.html":("Survival Systems — Pedro Pinczura","Proyecto personal de sistemas de supervivencia, crafting, IA y persistencia en Unity."),
+    "nba-bounce.html":("NBA BOUNCE — Crédito profesional — Pedro Pinczura","Functional QA, validación y feedback de gameplay durante el ciclo completo de producción de NBA BOUNCE."),
+    "barbie-horse-trails.html":("Barbie Horse Trails — Crédito profesional — Pedro Pinczura","Functional QA y feedback de UX/gameplay durante el ciclo completo de producción de Barbie Horse Trails."),
+    "dayz.html":("DayZ — Crédito profesional — Pedro Pinczura","Functional QA en PC / Steam centrado en armas, equipamiento, objetos, animaciones y balance."),
+    "chicken-run-eggstraction.html":("Chicken Run: Eggstraction — Crédito profesional — Pedro Pinczura","Soporte puntual de Functional QA en Steam, Nintendo Switch y PlayStation 5."),
+    "the-cat-in-the-hat-rainy-day-mayhem.html":("The Cat in the Hat — Crédito profesional — Pedro Pinczura","Functional QA puntual durante una fase temprana de beta en PC / Steam."),
+}
+
+def apply_es_meta(html, page):
+    title, desc = ES_META[page]
+    html = re.sub(r'<title>.*?</title>', f'<title>{title}</title>', html, count=1, flags=re.S)
+    if re.search(r'<meta name="description" content="[^"]*">', html):
+        html = re.sub(r'<meta name="description" content="[^"]*">', f'<meta name="description" content="{desc}">', html, count=1)
+    else:
+        html = html.replace('<meta name="theme-color"', f'<meta name="description" content="{desc}">\n  <meta name="theme-color"',1)
+    html = re.sub(r'<meta property="og:title" content="[^"]*">', f'<meta property="og:title" content="{title}">', html)
+    html = re.sub(r'<meta property="og:description" content="[^"]*">', f'<meta property="og:description" content="{desc}">', html)
+    return html
+
 es_dir = Path("dist/es")
 es_dir.mkdir(parents=True, exist_ok=True)
 for page in bilingual_pages:
     source = Path("dist") / page
     target = es_dir / page
     translated = translate_visible_es(source.read_text(encoding="utf-8"))
+    translated = apply_es_meta(translated, page)
     target.write_text(translated, encoding="utf-8")
 
 def add_language_toggle(path, page, spanish=False):
@@ -1695,11 +1832,14 @@ def _attr(tag, name):
 
 def _thumb_src(src):
     # Bandit Trail cover has no dedicated thumb in this bundle; its source is already small.
-    if src == "public/media/bandit-trail/cover.webp":
+    if src in ("public/media/bandit-trail/cover.webp","../public/media/bandit-trail/cover.webp"):
         return src
     prefix = "public/media/"
+    es_prefix = "../public/media/"
     if src.startswith(prefix):
         return "public/media/thumbs/" + src[len(prefix):]
+    if src.startswith(es_prefix):
+        return "../public/media/thumbs/" + src[len(es_prefix):]
     return src
 
 def _steam_markup(items):
