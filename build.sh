@@ -2735,4 +2735,37 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 
+
+# ===== Raster sharpness pass (same assets, same layout) =====
+# Keep every image source, order, crop and layout unchanged. The only purpose of
+# this override is to avoid sub-pixel resampling on static cover/main imagery.
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== Raster sharpness: no asset/layout changes ===== */
+.showcase-tile img,
+.pvis.covered>img.cover,
+.workmedia.covered>img,
+.detailmedia.covered>img.hero-cover{
+  image-rendering:auto;
+  image-rendering:-webkit-optimize-contrast;
+  backface-visibility:visible;
+}
+
+/* V19 used a permanent 1.001 scale that can soften raster images in Chromium. */
+.showcase-tile img{
+  transform:none!important;
+}
+.showcase-tile:hover img,
+.showcase-tile:focus-visible img{
+  transform:scale(1.04)!important;
+}
+@media(hover:none){
+  .showcase-tile:hover img,
+  .showcase-tile:focus-visible img{
+    transform:none!important;
+  }
+}
+''', encoding="utf-8")
+
 PY
