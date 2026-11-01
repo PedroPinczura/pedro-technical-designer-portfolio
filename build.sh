@@ -3463,11 +3463,11 @@ es_main = r'''
   <div class="c">
     <div class="rpg-sectionhead">
       <div><div class="ey">02 / IA enemiga y encuentros</div><h2>PATRULLA. SOSPECHA.<br>AGGRO.</h2></div>
-      <p>Los enemigos alternan entre patrulla, sospecha y combate según distancia y temporizadores. Las rutas se authorizan directamente en la escena y el aggro puede propagarse a enemigos cercanos, convirtiendo una detección individual en comportamiento de encuentro.</p>
+      <p>Los enemigos alternan entre patrulla, sospecha y combate según distancia y temporizadores. Las rutas se configuran directamente en la escena y el aggro puede propagarse a enemigos cercanos, convirtiendo una detección individual en comportamiento de encuentro.</p>
     </div>
     <figure class="rpg-wide-media">
       <img src="../public/media/rpg/enemy-ai-path.webp" alt="Scene View de Unity mostrando varias rutas y waypoints de patrulla enemiga" loading="lazy" decoding="async">
-      <figcaption>Rutas de patrulla y colocación de encuentros authoradas en escena.</figcaption>
+      <figcaption>Rutas de patrulla y colocación de encuentros configuradas en escena.</figcaption>
     </figure>
     <div class="rpg-code-row">
       <div class="rpg-code-copy"><span class="ey">Implementación seleccionada</span><h3>AGGRO GRUPAL SIN UN AI MANAGER MONOLÍTICO.</h3><p>Los actores cercanos reciben la misma señal de aggro a través de su propio AIController. El fragmento muestra el comportamiento sin exponer toda la lógica de estados.</p></div>
