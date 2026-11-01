@@ -4794,3 +4794,38 @@ cat >> dist/style.css <<'CSS'
 .rpg-stat-code .rpg-code-divider{height:1px;background:rgba(255,255,255,.08);margin:18px 0}
 .rpg-stat-code .rpg-code-note{margin-top:18px}
 CSS
+
+
+# ===== HOME PERSONAL PROJECTS COVER V1 =====
+mkdir -p dist/public/media/personal-projects
+cat assets/personal-projects-home/part-*.txt | base64 -d > dist/public/media/personal-projects/cover-home.webp
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+def apply_personal_cover(path, src, alt):
+    p = Path(path)
+    html = p.read_text(encoding="utf-8")
+    pattern = r'<div class="pvis personal-visual">.*?</div><div class="pc">'
+    replacement = (
+        '<div class="pvis covered personal-visual">'
+        f'<img class="cover" src="{src}" alt="{alt}" loading="lazy" decoding="async">'
+        '</div><div class="pc">'
+    )
+    html, count = re.subn(pattern, replacement, html, count=1, flags=re.S)
+    if count != 1:
+        raise SystemExit(f"Personal Projects home cover not found in {path}")
+    p.write_text(html, encoding="utf-8")
+
+apply_personal_cover(
+    "dist/index.html",
+    "public/media/personal-projects/cover-home.webp",
+    "Personal Projects cover combining stylized fantasy RPG and PAPERly-inspired adventure imagery"
+)
+apply_personal_cover(
+    "dist/es/index.html",
+    "../public/media/personal-projects/cover-home.webp",
+    "Portada de Proyectos personales que combina fantasía RPG y aventura inspirada en PAPERly"
+)
+PY
