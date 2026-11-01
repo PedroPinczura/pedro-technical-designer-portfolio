@@ -3719,7 +3719,8 @@ PY
 # Optional media overlay. When present it replaces selected V1 media with higher-quality encodes.
 if [ -f rpg-assets/rpg-v2-assets.b64 ]; then
   base64 -d rpg-assets/rpg-v2-assets.b64 > rpg-v2-assets.tar.gz
-  tar -xzf rpg-v2-assets.tar.gz -C dist
+  mkdir -p dist/public/media/rpg
+  tar -xzf rpg-v2-assets.tar.gz -C dist/public/media/rpg
   rm -f rpg-v2-assets.tar.gz
 fi
 
