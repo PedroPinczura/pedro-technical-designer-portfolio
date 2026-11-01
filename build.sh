@@ -4631,3 +4631,56 @@ AttemptSwap(destinationContainer, sourceContainer);</code></pre>
 patch_page("dist/rpg-systems.html", es=False)
 patch_page("dist/es/rpg-systems.html", es=True)
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V6 / FINAL COPY CONSISTENCY =====
+python3 - <<'PY'
+from pathlib import Path
+
+def patch(path, replacements):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    for old,new in replacements:
+        if old not in text:
+            raise SystemExit(f"Missing final RPG copy target in {path}: {old[:90]}")
+        text=text.replace(old,new,1)
+    p.write_text(text,encoding="utf-8")
+
+patch("dist/rpg-systems.html",[
+    (
+        'combat awards XP, drop tables generate loot, and inventory, equipment and world items can persist across scene changes.',
+        'enemy defeats award XP, drop tables generate loot, and inventory, equipment and world items can persist across scene changes.'
+    ),
+    (
+        'data-title="Enemy AI paths" data-caption="Scene-authored patrol paths and encounter layout."',
+        'data-title="Enemy AI paths" data-caption="Scene-authored patrol paths and enemy placement."'
+    ),
+])
+
+patch("dist/es/rpg-systems.html",[
+    (
+        'el combate otorga XP, las tablas de drops generan loot y el inventario, el equipamiento y los objetos del mundo pueden persistir entre escenas.',
+        'derrotar enemigos otorga XP, las tablas de drops generan loot y el inventario, el equipamiento y los objetos del mundo pueden persistir entre escenas.'
+    ),
+    (
+        'data-title="Inventario y action bar" data-caption="Equipar un objeto y mover una poción a la action bar."',
+        'data-title="Inventario y action bar" data-caption="Equipar la espada, mover una poción de vida a la action bar y utilizarla."'
+    ),
+    (
+        'data-title="Inventario y equipamiento" data-caption="Captura adicional de interacción entre inventario y equipamiento."',
+        'data-title="Inventario y equipamiento" data-caption="Intercambiar arco y espada entre el inventario y el slot de arma."'
+    ),
+    (
+        'data-title="Transición de portal" data-caption="Transición de escena y reposicionamiento persistente del jugador."',
+        'data-title="Transición de portal" data-caption="Transición entre escenas con fade y reposicionamiento en el portal de destino correspondiente."'
+    ),
+    (
+        'data-title="Integración de cinemática" data-caption="Cinemática con Timeline integrada con el control del jugador."',
+        'data-title="Integración de cinemática" data-caption="Secuencia de Timeline que desactiva temporalmente el control del jugador y lo restaura al terminar."'
+    ),
+    (
+        'data-title="Rutas de IA enemiga" data-caption="Rutas de patrulla y encuentros configurados en Scene View."',
+        'data-title="Rutas de IA enemiga" data-caption="Rutas de patrulla y colocación de enemigos configuradas en Scene View."'
+    ),
+])
+PY
