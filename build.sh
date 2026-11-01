@@ -4413,3 +4413,221 @@ def patch_rpg(path, es=False):
 patch_rpg("dist/rpg-systems.html", es=False)
 patch_rpg("dist/es/rpg-systems.html", es=True)
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V5 / COHERENCE AUDIT =====
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+def replace_required(text, old, new, label):
+    if old not in text:
+        raise SystemExit(f"Missing RPG coherence target: {label}")
+    return text.replace(old, new, 1)
+
+def patch_page(path, es=False):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+
+    if es:
+        text=replace_required(
+            text,
+            'El proyecto explora cómo las features clásicas de un RPG ganan valor cuando comparten interfaces y datos claros. Equipar un objeto puede modificar stats y combate; las muertes alimentan XP y loot; los objetos del mundo y el estado del personaje persisten entre escenas.',
+            'El proyecto explora cómo las features clásicas de un RPG ganan valor cuando comparten interfaces y datos claros. Equipar un objeto puede modificar stats y combate; el combate otorga XP, las tablas de drops generan loot y el inventario, el equipamiento y los objetos del mundo pueden persistir entre escenas.',
+            'ES overview'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, Animator Override, daño y rango</strong></figcaption>',
+            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, Animator Override, mano, rango y modificadores de daño</strong></figcaption>',
+            'ES sword config caption'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>GAMEPLAY MELEE</span><strong>Combate con espada → timing de ataque → daño → derrota del enemigo</strong></figcaption>',
+            '<figcaption><span>GAMEPLAY MELEE</span><strong>Espada → golpes melee → daño → derrota del enemigo → XP</strong></figcaption>',
+            'ES sword video caption'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>BOW / WEAPONCONFIG</span><strong>Configuración ranged: Animator Override, rango 20 y proyectil Red Arrow</strong></figcaption>',
+            '<figcaption><span>BOW / WEAPONCONFIG</span><strong>Ejemplo ranged: Animator Override, rango 20 y proyectil Red Arrow</strong></figcaption>',
+            'ES bow caption'
+        )
+        text=replace_required(
+            text,
+            'aria-label="Gameplay de inventario moviendo armas entre inventario y equipamiento"',
+            'aria-label="Gameplay de inventario intercambiando arco y espada entre inventario y el slot de arma"',
+            'ES inventory video aria'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>INTERACCIÓN</span><strong>Equipar un arma → mover una poción a la action bar</strong></figcaption>',
+            '<figcaption><span>INTERACCIÓN</span><strong>Intercambiar arco ↔ espada entre inventario y el slot de arma</strong></figcaption>',
+            'ES inventory video caption'
+        )
+        old_code='''<div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Transferencia genérica</strong></div>
+        <pre><code>var acceptable = destination.MaxAcceptable(draggingItem);
+var toTransfer = Mathf.Min(acceptable, draggingNumber);
+
+if (toTransfer &gt; 0)
+{
+    source.RemoveItems(toTransfer);
+    destination.AddItems(draggingItem, toTransfer);
+}</code></pre>
+        <p class="rpg-code-note">El mismo contrato source / destination sirve para inventario, equipamiento, action bar y para soltar objetos de nuevo en el mundo.</p>
+      </div>'''
+        new_code='''<div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Transferencia vs. intercambio</strong></div>
+        <pre><code>var destinationContainer = destination as IDragContainer&lt;T&gt;;
+var sourceContainer = source as IDragContainer&lt;T&gt;;
+
+if (destinationContainer == null || sourceContainer == null ||
+    destinationContainer.GetItem() == null ||
+    ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
+{
+    AttemptSimpleTransfer(destination);
+    return;
+}
+
+AttemptSwap(destinationContainer, sourceContainer);</code></pre>
+        <p class="rpg-code-note">Un destino vacío usa transferencia simple; dos contenedores ocupados con objetos distintos pasan a la lógica de swap. La misma abstracción de destino se reutiliza en inventario, equipamiento, action bar y world drop.</p>
+      </div>'''
+        text=replace_required(text,old_code,new_code,'ES inventory code')
+        text=replace_required(
+            text,
+            '<figcaption><span>FLUJO MULTI-ESCENA</span><strong>Fade → save → load → restore → reposition</strong></figcaption>',
+            '<figcaption><span>FLUJO MULTI-ESCENA</span><strong>Fade out → save → cargar escena → restaurar estado → reposicionar → fade in</strong></figcaption>',
+            'ES portal caption'
+        )
+        text=replace_required(
+            text,
+            'Todas las capturas y vídeos del proyecto en un visor único: selecciona cualquier thumbnail para cambiar el contenido principal.',
+            'Una selección visual de gameplay, sistemas y vistas del mundo en un único visor. Selecciona cualquier thumbnail para cambiar el contenido principal.',
+            'ES gallery intro'
+        )
+        text=text.replace(
+            'data-title="Inventory &amp; action bar" data-caption="Equipar un objeto y mover una poción a la action bar."',
+            'data-title="Inventory &amp; action bar" data-caption="Equipar la espada, mover una poción de vida a la action bar y utilizarla."',
+            1
+        )
+        text=text.replace(
+            'data-title="Inventory &amp; equipment" data-caption="Captura adicional de interacción entre inventario y equipamiento."',
+            'data-title="Inventory &amp; equipment" data-caption="Intercambiar arco y espada entre el inventario y el slot de arma."',
+            1
+        )
+        text=text.replace(
+            'data-title="Portal transition" data-caption="Transición de escena y reposicionamiento persistente del jugador."',
+            'data-title="Portal transition" data-caption="Transición entre escenas con fade y reposicionamiento en el portal de destino correspondiente."',
+            1
+        )
+        text=text.replace(
+            'data-title="Cinematic integration" data-caption="Cinemática con Timeline integrada con el control del jugador."',
+            'data-title="Cinematic integration" data-caption="Secuencia de Timeline que desactiva temporalmente el control del jugador y lo restaura al terminar."',
+            1
+        )
+    else:
+        text=replace_required(
+            text,
+            'The project explores how classic RPG features become more useful when they share clear interfaces and data. Equipping an item can alter stats and combat; enemy deaths feed XP and loot; world items and character state persist through scene changes.',
+            'The project explores how classic RPG features become more useful when they share clear interfaces and data. Equipping an item can alter stats and combat; combat awards XP, drop tables generate loot, and inventory, equipment and world items can persist across scene changes.',
+            'EN overview'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Melee configuration: equipped prefab, animation override, damage and range</strong></figcaption>',
+            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Melee configuration: equipped prefab, animation override, handedness, range and damage modifiers</strong></figcaption>',
+            'EN sword config caption'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>MELEE GAMEPLAY</span><strong>Sword combat → attack timing → damage → enemy defeat</strong></figcaption>',
+            '<figcaption><span>MELEE GAMEPLAY</span><strong>Sword → melee hits → damage → enemy defeat → XP</strong></figcaption>',
+            'EN sword video caption'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>BOW / WEAPONCONFIG</span><strong>Ranged configuration: Animator Override, 20 range and Red Arrow projectile</strong></figcaption>',
+            '<figcaption><span>BOW / WEAPONCONFIG</span><strong>Ranged example: Animator Override, 20 range and Red Arrow projectile</strong></figcaption>',
+            'EN bow caption'
+        )
+        text=replace_required(
+            text,
+            'aria-label="Inventory gameplay showing weapons being moved between inventory and equipment"',
+            'aria-label="Inventory gameplay swapping bow and sword between the inventory and weapon equipment slot"',
+            'EN inventory video aria'
+        )
+        text=replace_required(
+            text,
+            '<figcaption><span>INTERACTION</span><strong>Equip a weapon → move a potion into the action bar</strong></figcaption>',
+            '<figcaption><span>INTERACTION</span><strong>Swap bow ↔ sword between inventory and the weapon slot</strong></figcaption>',
+            'EN inventory video caption'
+        )
+        old_code='''<div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Generic transfer</strong></div>
+        <pre><code>var acceptable = destination.MaxAcceptable(draggingItem);
+var toTransfer = Mathf.Min(acceptable, draggingNumber);
+
+if (toTransfer &gt; 0)
+{
+    source.RemoveItems(toTransfer);
+    destination.AddItems(draggingItem, toTransfer);
+}</code></pre>
+        <p class="rpg-code-note">The same source / destination contract supports inventory slots, equipment, the action bar and dropping items back into the world.</p>
+      </div>'''
+        new_code='''<div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Transfer vs. swap</strong></div>
+        <pre><code>var destinationContainer = destination as IDragContainer&lt;T&gt;;
+var sourceContainer = source as IDragContainer&lt;T&gt;;
+
+if (destinationContainer == null || sourceContainer == null ||
+    destinationContainer.GetItem() == null ||
+    ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
+{
+    AttemptSimpleTransfer(destination);
+    return;
+}
+
+AttemptSwap(destinationContainer, sourceContainer);</code></pre>
+        <p class="rpg-code-note">An empty destination uses a simple transfer; two occupied containers with different items route into the swap logic. The same destination abstraction is reused by inventory, equipment, the action bar and world-drop targets.</p>
+      </div>'''
+        text=replace_required(text,old_code,new_code,'EN inventory code')
+        text=replace_required(
+            text,
+            '<figcaption><span>MULTI-SCENE FLOW</span><strong>Fade → save → load → restore → reposition</strong></figcaption>',
+            '<figcaption><span>MULTI-SCENE FLOW</span><strong>Fade out → save → load scene → restore state → reposition → fade in</strong></figcaption>',
+            'EN portal caption'
+        )
+        text=replace_required(
+            text,
+            'Every project capture and video in one viewer. Select any thumbnail to switch the main media.',
+            'A visual selection of gameplay, systems and world captures in one viewer. Select any thumbnail to switch the main media.',
+            'EN gallery intro'
+        )
+        text=text.replace(
+            'data-title="Inventory &amp; action bar" data-caption="Equipping an item and moving a potion into the action bar."',
+            'data-title="Inventory &amp; action bar" data-caption="Equip the sword, move a health potion into the action bar, then use it."',
+            1
+        )
+        text=text.replace(
+            'data-title="Inventory &amp; equipment" data-caption="Additional inventory and equipment interaction capture."',
+            'data-title="Inventory &amp; equipment" data-caption="Swap bow and sword between the inventory and the weapon equipment slot."',
+            1
+        )
+        text=text.replace(
+            'data-title="Portal transition" data-caption="Scene transition and persistent player repositioning."',
+            'data-title="Portal transition" data-caption="Fade between scenes and reposition the player at the matching destination portal."',
+            1
+        )
+        text=text.replace(
+            'data-title="Cinematic integration" data-caption="Timeline-driven cinematic integrated with player control."',
+            'data-title="Cinematic integration" data-caption="Timeline sequence temporarily disables player control and restores it when the cinematic ends."',
+            1
+        )
+
+    p.write_text(text,encoding="utf-8")
+
+patch_page("dist/rpg-systems.html", es=False)
+patch_page("dist/es/rpg-systems.html", es=True)
+PY
