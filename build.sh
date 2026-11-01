@@ -3181,3 +3181,535 @@ for page in bilingual_pages:
         p.write_text(html, encoding="utf-8")
 
 PY
+
+# ===== RPG SYSTEMS CASE STUDY V1 =====
+# ===== RPG SYSTEMS CASE STUDY V1 =====
+# Optimized portfolio media selected from the RPG project captures and clips.
+mkdir -p dist/public/media/rpg
+base64 -d rpg-assets/rpg-final-assets.b64 > rpg-assets-final.tar.gz
+tar -xzf rpg-assets-final.tar.gz -C dist
+rm -f rpg-assets-final.tar.gz
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+def replace_main(path, new_main):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    text, count = re.subn(
+        r'<main id="main-content">.*?</main>',
+        '<main id="main-content">' + new_main + '</main>',
+        text,
+        count=1,
+        flags=re.S,
+    )
+    if count != 1:
+        raise SystemExit(f"Could not replace main content in {path}")
+    p.write_text(text, encoding="utf-8")
+
+def replace_once(path, old, new):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    if old not in text:
+        raise SystemExit(f"Expected text not found in {path}: {old[:90]}")
+    p.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+en_main = r'''
+<section class="rpg-pagehero c">
+  <a class="back ey micro-link" href="work.html#personal"><span class="micro-arrow micro-arrow-left">←</span> PERSONAL PROJECTS</a>
+  <div class="ey">PERSONAL PROJECT / UNITY · C#</div>
+  <h1>RPG<br><span class="blue">SYSTEMS.</span></h1>
+  <p class="rpg-lead">A modular RPG prototype built around <strong class="scan-key">interconnected gameplay systems</strong>: combat, enemy AI, inventory & equipment, progression, loot and persistent world state.</p>
+  <div class="rpg-meta">
+    <div><span>ROLE</span><strong>Technical Designer / Gameplay Programmer</strong></div>
+    <div><span>ENGINE</span><strong>Unity / C#</strong></div>
+    <div><span>FOCUS</span><strong>Systems integration & gameplay architecture</strong></div>
+    <div><span>STATUS</span><strong>Playable systems prototype</strong></div>
+  </div>
+</section>
+
+<section class="rpg-hero c">
+  <img src="public/media/rpg/hero.webp" alt="RPG Project key art showing the low-poly fantasy village, adventurer and portal">
+  <div class="rpg-hero-shade"></div>
+  <div class="rpg-hero-caption"><span class="ey">RPG PROJECT</span><strong>CONNECTED SYSTEMS.<br>PLAYABLE RESULTS.</strong></div>
+</section>
+
+<section class="rpg-overview">
+  <div class="c rpg-overview-grid">
+    <div>
+      <div class="ey">System overview</div>
+      <h2>DESIGNED TO<br><span class="blue">WORK TOGETHER.</span></h2>
+    </div>
+    <div>
+      <p>The project explores how classic RPG features become more useful when they share clear interfaces and data. Equipping an item can alter stats and combat; enemy deaths feed XP and loot; world items and character state persist through scene changes.</p>
+      <div class="chips">
+        <span class="chip">Combat</span><span class="chip">Enemy AI</span><span class="chip">Inventory</span><span class="chip">Equipment</span><span class="chip">Progression</span><span class="chip">Loot</span><span class="chip">Persistence</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">01 / Combat & weapons</div><h2>ONE COMBAT FLOW.<br>DIFFERENT WEAPONS.</h2></div>
+      <p>Equipping a <strong>WeaponConfig</strong> updates the character's visual weapon and animation set, while the same Fighter flow supports melee and projectile attacks. Range, damage, handedness and projectile behaviour stay data-driven.</p>
+    </div>
+    <div class="rpg-media-grid rpg-combat-grid">
+      <figure class="rpg-media rpg-video-card">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Ranged combat gameplay showing projectiles, damage and enemy defeat">
+          <source src="public/media/rpg/ranged-combat.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>GAMEPLAY</span><strong>Ranged combat → projectile → damage → XP</strong></figcaption>
+      </figure>
+      <figure class="rpg-media rpg-inspector-card">
+        <img src="public/media/rpg/weapon-config.webp" alt="Unity Inspector showing the Sword WeaponConfig data" loading="lazy" decoding="async">
+        <figcaption><span>DATA-DRIVEN CONFIG</span><strong>Weapon prefab, animation override, range and modifiers</strong></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section rpg-section-alt">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">02 / Enemy AI & encounters</div><h2>PATROL. SUSPICION.<br>AGGRO.</h2></div>
+      <p>Enemies transition between patrol, suspicion and combat according to distance and timers. Patrol paths are authored directly in the scene, while aggro can propagate to nearby enemies to turn individual detection into encounter-level behaviour.</p>
+    </div>
+    <figure class="rpg-wide-media">
+      <img src="public/media/rpg/enemy-ai-path.webp" alt="Unity Scene view showing several enemy patrol paths and waypoints" loading="lazy" decoding="async">
+      <figcaption>Scene-authored patrol routes and encounter placement.</figcaption>
+    </figure>
+    <div class="rpg-code-row">
+      <div class="rpg-code-copy">
+        <span class="ey">Selected implementation</span>
+        <h3>GROUP AGGRO WITHOUT A MONOLITHIC AI MANAGER.</h3>
+        <p>Nearby actors receive the same aggro signal through their own AIController. The snippet shows the behaviour without exposing the whole state logic.</p>
+      </div>
+      <div class="rpg-code-card">
+        <div class="rpg-code-head"><span>AIController.cs</span><strong>Nearby aggro</strong></div>
+        <pre><code>private void AggrevateNearbyEnemies()
+{
+    RaycastHit[] hits = Physics.SphereCastAll(
+        transform.position, shoutDistance, Vector3.up, 0);
+
+    foreach (RaycastHit hit in hits)
+    {
+        AIController ai = hit.collider.GetComponent&lt;AIController&gt;();
+        if (ai == null) continue;
+        ai.Aggrevate();
+    }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">03 / Inventory & equipment</div><h2>FROM WORLD PICKUP<br>TO CHARACTER BUILD.</h2></div>
+      <p>Pickups enter a stack-aware inventory, can be dragged into compatible equipment or action slots, and can be dropped back into the world. Equipment changes then propagate into combat and stat calculations.</p>
+    </div>
+    <figure class="rpg-wide-media rpg-inventory-shot">
+      <img src="public/media/rpg/inventory-equipment.webp" alt="RPG inventory and equipment UI open over the game world" loading="lazy" decoding="async">
+      <figcaption>Inventory, equipment slots and action bar working inside the playable scene.</figcaption>
+    </figure>
+    <div class="rpg-media-grid rpg-inventory-grid">
+      <figure class="rpg-media rpg-video-card">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Inventory gameplay showing weapons being moved between inventory and equipment">
+          <source src="public/media/rpg/inventory-equipment.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>INTERACTION</span><strong>Drag & drop between inventory and equipment</strong></figcaption>
+      </figure>
+      <div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Generic transfer</strong></div>
+        <pre><code>var acceptable = destination.MaxAcceptable(draggingItem);
+var toTransfer = Mathf.Min(acceptable, draggingNumber);
+
+if (toTransfer &gt; 0)
+{
+    source.RemoveItems(toTransfer);
+    destination.AddItems(draggingItem, toTransfer);
+}</code></pre>
+        <p class="rpg-code-note">The same source / destination contract supports inventory slots, equipment, the action bar and dropping items back into the world.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section rpg-section-alt">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">04 / Stats & progression</div><h2>DATA FIRST.<br>MODIFIERS SECOND.</h2></div>
+      <p>Base values come from a data-driven Progression asset. Equipment contributes additive and percentage modifiers through <strong>IModifierProvider</strong>, keeping item logic decoupled from BaseStats.</p>
+    </div>
+    <div class="rpg-progression-grid">
+      <figure class="rpg-media rpg-inspector-card">
+        <img src="public/media/rpg/helmet-modifier.webp" alt="Unity Inspector showing a Healthy Helmet that adds ten maximum health" loading="lazy" decoding="async">
+        <figcaption><span>EQUIPMENT MODIFIER</span><strong>Healthy Helmet → +10 Max Health</strong></figcaption>
+      </figure>
+      <div class="rpg-code-card rpg-code-card-center">
+        <div class="rpg-code-head"><span>BaseStats.cs</span><strong>Final stat pipeline</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}</code></pre>
+        <p class="rpg-code-note">Character class and level define the base value; equipment can extend it without BaseStats knowing the concrete item type.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">05 / Persistence & scenes</div><h2>THE WORLD<br>REMEMBERS.</h2></div>
+      <p>Components opt into persistence through <strong>ISaveable</strong>. Position, health, XP, inventory, equipment, action slots, pickups and dropped world items can be restored while portals coordinate save/load with scene transitions and player repositioning.</p>
+    </div>
+    <div class="rpg-persistence-grid">
+      <figure class="rpg-media rpg-video-card rpg-portal-video">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Portal transition between RPG scenes with fade">
+          <source src="public/media/rpg/portals.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>MULTI-SCENE FLOW</span><strong>Fade → save → load → restore → reposition</strong></figcaption>
+      </figure>
+      <div class="rpg-state-card">
+        <div class="ey">Persistent state</div>
+        <div class="rpg-state-grid">
+          <span>Player position</span><span>Health</span><span>Experience</span><span>Inventory</span><span>Equipment</span><span>Action slots</span><span>Pickups</span><span>World drops</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-architecture">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">06 / Technical architecture</div><h2>SMALL INTERFACES.<br>CLEAR BOUNDARIES.</h2></div>
+      <p>Instead of centralising every interaction, small contracts define how systems participate. That keeps movement, combat, interaction, persistence and stat modifiers composable.</p>
+    </div>
+    <div class="rpg-arch-grid">
+      <article><span>01</span><code>IAction</code><p>Coordinates mutually exclusive actions such as movement and combat through ActionScheduler.</p></article>
+      <article><span>02</span><code>IRaycastable</code><p>Provides context interaction and cursor behaviour without hard-coding each interactable into PlayerController.</p></article>
+      <article><span>03</span><code>ISaveable</code><p>Lets each component own the state it captures and restores.</p></article>
+      <article><span>04</span><code>IModifierProvider</code><p>Feeds additive and percentage modifiers into the shared stat pipeline.</p></article>
+    </div>
+  </div>
+</section>
+
+<nav class="credit-projectnav"><div class="c credit-projectnav-grid">
+  <a class="credit-nav-item micro-link" href="paperly.html"><span><span class="micro-arrow micro-arrow-left">←</span> PREVIOUS PROJECT</span><strong>PAPERly</strong></a>
+  <a class="all-credits micro-link" href="work.html#personal">ALL PROJECTS</a>
+  <a class="credit-nav-item next micro-link" href="survival-systems.html"><span>NEXT PROJECT <span class="micro-arrow micro-arrow-right">→</span></span><strong>Survival Systems</strong></a>
+</div></nav>
+'''
+
+es_main = r'''
+<section class="rpg-pagehero c">
+  <a class="back ey micro-link" href="work.html#personal"><span class="micro-arrow micro-arrow-left">←</span> PROYECTOS PERSONALES</a>
+  <div class="ey">PROYECTO PERSONAL / UNITY · C#</div>
+  <h1>RPG<br><span class="blue">SYSTEMS.</span></h1>
+  <p class="rpg-lead">Un prototipo RPG modular construido alrededor de <strong class="scan-key">sistemas de gameplay interconectados</strong>: combate, IA de enemigos, inventario y equipamiento, progresión, loot y persistencia del mundo.</p>
+  <div class="rpg-meta">
+    <div><span>ROL</span><strong>Technical Designer / Gameplay Programmer</strong></div>
+    <div><span>MOTOR</span><strong>Unity / C#</strong></div>
+    <div><span>ENFOQUE</span><strong>Integración de sistemas y arquitectura de gameplay</strong></div>
+    <div><span>ESTADO</span><strong>Prototipo de sistemas jugable</strong></div>
+  </div>
+</section>
+
+<section class="rpg-hero c">
+  <img src="../public/media/rpg/hero.webp" alt="Key art de RPG Project con la aldea fantástica low-poly, aventurero y portal">
+  <div class="rpg-hero-shade"></div>
+  <div class="rpg-hero-caption"><span class="ey">RPG PROJECT</span><strong>SISTEMAS CONECTADOS.<br>RESULTADOS JUGABLES.</strong></div>
+</section>
+
+<section class="rpg-overview">
+  <div class="c rpg-overview-grid">
+    <div><div class="ey">Vista general</div><h2>DISEÑADOS PARA<br><span class="blue">TRABAJAR JUNTOS.</span></h2></div>
+    <div>
+      <p>El proyecto explora cómo las features clásicas de un RPG ganan valor cuando comparten interfaces y datos claros. Equipar un objeto puede modificar stats y combate; las muertes alimentan XP y loot; los objetos del mundo y el estado del personaje persisten entre escenas.</p>
+      <div class="chips"><span class="chip">Combate</span><span class="chip">IA enemiga</span><span class="chip">Inventario</span><span class="chip">Equipamiento</span><span class="chip">Progresión</span><span class="chip">Loot</span><span class="chip">Persistencia</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">01 / Combate y armas</div><h2>UN MISMO FLUJO.<br>DISTINTAS ARMAS.</h2></div>
+      <p>Al equipar un <strong>WeaponConfig</strong> se actualizan el arma visual y el set de animaciones, mientras Fighter reutiliza el mismo flujo de combate para armas melee y proyectiles. Rango, daño, mano y proyectil permanecen data-driven.</p>
+    </div>
+    <div class="rpg-media-grid rpg-combat-grid">
+      <figure class="rpg-media rpg-video-card">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Gameplay de combate a distancia con proyectiles, daño y derrota del enemigo">
+          <source src="../public/media/rpg/ranged-combat.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>GAMEPLAY</span><strong>Combate ranged → proyectil → daño → XP</strong></figcaption>
+      </figure>
+      <figure class="rpg-media rpg-inspector-card">
+        <img src="../public/media/rpg/weapon-config.webp" alt="Inspector de Unity mostrando los datos de Sword WeaponConfig" loading="lazy" decoding="async">
+        <figcaption><span>CONFIGURACIÓN DATA-DRIVEN</span><strong>Prefab, Animator Override, rango y modificadores</strong></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section rpg-section-alt">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">02 / IA enemiga y encuentros</div><h2>PATRULLA. SOSPECHA.<br>AGGRO.</h2></div>
+      <p>Los enemigos alternan entre patrulla, sospecha y combate según distancia y temporizadores. Las rutas se authorizan directamente en la escena y el aggro puede propagarse a enemigos cercanos, convirtiendo una detección individual en comportamiento de encuentro.</p>
+    </div>
+    <figure class="rpg-wide-media">
+      <img src="../public/media/rpg/enemy-ai-path.webp" alt="Scene View de Unity mostrando varias rutas y waypoints de patrulla enemiga" loading="lazy" decoding="async">
+      <figcaption>Rutas de patrulla y colocación de encuentros authoradas en escena.</figcaption>
+    </figure>
+    <div class="rpg-code-row">
+      <div class="rpg-code-copy"><span class="ey">Implementación seleccionada</span><h3>AGGRO GRUPAL SIN UN AI MANAGER MONOLÍTICO.</h3><p>Los actores cercanos reciben la misma señal de aggro a través de su propio AIController. El fragmento muestra el comportamiento sin exponer toda la lógica de estados.</p></div>
+      <div class="rpg-code-card">
+        <div class="rpg-code-head"><span>AIController.cs</span><strong>Aggro cercano</strong></div>
+        <pre><code>private void AggrevateNearbyEnemies()
+{
+    RaycastHit[] hits = Physics.SphereCastAll(
+        transform.position, shoutDistance, Vector3.up, 0);
+
+    foreach (RaycastHit hit in hits)
+    {
+        AIController ai = hit.collider.GetComponent&lt;AIController&gt;();
+        if (ai == null) continue;
+        ai.Aggrevate();
+    }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">03 / Inventario y equipamiento</div><h2>DEL PICKUP DEL MUNDO<br>A LA BUILD DEL PERSONAJE.</h2></div>
+      <p>Los pickups entran en un inventario con stacks, pueden arrastrarse a slots compatibles de equipamiento o action bar y volver a soltarse en el mundo. Los cambios de equipo se propagan después a combate y cálculo de stats.</p>
+    </div>
+    <figure class="rpg-wide-media rpg-inventory-shot">
+      <img src="../public/media/rpg/inventory-equipment.webp" alt="UI de inventario y equipamiento RPG abierta sobre el mundo de juego" loading="lazy" decoding="async">
+      <figcaption>Inventario, slots de equipo y action bar funcionando dentro de la escena jugable.</figcaption>
+    </figure>
+    <div class="rpg-media-grid rpg-inventory-grid">
+      <figure class="rpg-media rpg-video-card">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Gameplay de inventario moviendo armas entre inventario y equipamiento">
+          <source src="../public/media/rpg/inventory-equipment.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>INTERACCIÓN</span><strong>Drag & drop entre inventario y equipamiento</strong></figcaption>
+      </figure>
+      <div class="rpg-code-card">
+        <div class="rpg-code-head"><span>DragItem&lt;T&gt;</span><strong>Transferencia genérica</strong></div>
+        <pre><code>var acceptable = destination.MaxAcceptable(draggingItem);
+var toTransfer = Mathf.Min(acceptable, draggingNumber);
+
+if (toTransfer &gt; 0)
+{
+    source.RemoveItems(toTransfer);
+    destination.AddItems(draggingItem, toTransfer);
+}</code></pre>
+        <p class="rpg-code-note">El mismo contrato source / destination sirve para inventario, equipamiento, action bar y para soltar objetos de nuevo en el mundo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section rpg-section-alt">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">04 / Stats y progresión</div><h2>PRIMERO DATOS.<br>DESPUÉS MODIFICADORES.</h2></div>
+      <p>Los valores base proceden de un asset Progression data-driven. El equipamiento aporta modificadores aditivos y porcentuales mediante <strong>IModifierProvider</strong>, manteniendo la lógica de ítems desacoplada de BaseStats.</p>
+    </div>
+    <div class="rpg-progression-grid">
+      <figure class="rpg-media rpg-inspector-card">
+        <img src="../public/media/rpg/helmet-modifier.webp" alt="Inspector de Unity mostrando un Healthy Helmet que añade diez puntos de vida máxima" loading="lazy" decoding="async">
+        <figcaption><span>MODIFICADOR DE EQUIPO</span><strong>Healthy Helmet → +10 Max Health</strong></figcaption>
+      </figure>
+      <div class="rpg-code-card rpg-code-card-center">
+        <div class="rpg-code-head"><span>BaseStats.cs</span><strong>Pipeline de stat final</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}</code></pre>
+        <p class="rpg-code-note">La clase y el nivel definen el valor base; el equipo puede extenderlo sin que BaseStats conozca el tipo concreto de objeto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">05 / Persistencia y escenas</div><h2>EL MUNDO<br>RECUERDA.</h2></div>
+      <p>Los componentes implementan <strong>ISaveable</strong> para participar en la persistencia. Posición, vida, XP, inventario, equipamiento, action slots, pickups y drops del mundo se restauran mientras los portales coordinan guardado/carga, transición de escena y reposicionamiento.</p>
+    </div>
+    <div class="rpg-persistence-grid">
+      <figure class="rpg-media rpg-video-card rpg-portal-video">
+        <video autoplay muted loop playsinline preload="metadata" aria-label="Transición mediante portal entre escenas del RPG con fundido">
+          <source src="../public/media/rpg/portals.mp4" type="video/mp4">
+        </video>
+        <figcaption><span>FLUJO MULTI-ESCENA</span><strong>Fade → save → load → restore → reposition</strong></figcaption>
+      </figure>
+      <div class="rpg-state-card"><div class="ey">Estado persistente</div><div class="rpg-state-grid"><span>Posición</span><span>Vida</span><span>Experiencia</span><span>Inventario</span><span>Equipamiento</span><span>Action slots</span><span>Pickups</span><span>World drops</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="rpg-architecture">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">06 / Arquitectura técnica</div><h2>INTERFACES PEQUEÑAS.<br>FRONTERAS CLARAS.</h2></div>
+      <p>En lugar de centralizar cada interacción, pequeños contratos definen cómo participa cada sistema. Así movimiento, combate, interacción, persistencia y modificadores de stats permanecen componibles.</p>
+    </div>
+    <div class="rpg-arch-grid">
+      <article><span>01</span><code>IAction</code><p>Coordina acciones incompatibles como movimiento y combate mediante ActionScheduler.</p></article>
+      <article><span>02</span><code>IRaycastable</code><p>Gestiona interacción contextual y cursor sin hardcodear cada interactuable en PlayerController.</p></article>
+      <article><span>03</span><code>ISaveable</code><p>Permite que cada componente sea dueño del estado que captura y restaura.</p></article>
+      <article><span>04</span><code>IModifierProvider</code><p>Introduce modificadores aditivos y porcentuales en el pipeline compartido de stats.</p></article>
+    </div>
+  </div>
+</section>
+
+<nav class="credit-projectnav"><div class="c credit-projectnav-grid">
+  <a class="credit-nav-item micro-link" href="paperly.html"><span><span class="micro-arrow micro-arrow-left">←</span> PROYECTO ANTERIOR</span><strong>PAPERly</strong></a>
+  <a class="all-credits micro-link" href="work.html#personal">TODOS LOS PROYECTOS</a>
+  <a class="credit-nav-item next micro-link" href="survival-systems.html"><span>SIGUIENTE PROYECTO <span class="micro-arrow micro-arrow-right">→</span></span><strong>Survival Systems</strong></a>
+</div></nav>
+'''
+
+replace_main("dist/rpg-systems.html", en_main)
+replace_main("dist/es/rpg-systems.html", es_main)
+
+# RPG-specific metadata and social card.
+for path, desc in [
+    ("dist/rpg-systems.html", "RPG Systems — Unity/C# technical design case study covering combat, AI, inventory, progression, loot and persistence."),
+    ("dist/es/rpg-systems.html", "RPG Systems — caso de estudio de Technical Design en Unity/C#: combate, IA, inventario, progresión, loot y persistencia."),
+]:
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    text = re.sub(r'<meta name="description" content="[^"]*">', f'<meta name="description" content="{desc}">', text, count=1)
+    text = re.sub(r'<meta property="og:description" content="[^"]*">', f'<meta property="og:description" content="{desc}">', text, count=1)
+    text = re.sub(r'<meta name="twitter:description" content="[^"]*">', f'<meta name="twitter:description" content="{desc}">', text, count=1)
+    text = re.sub(r'<meta property="og:image" content="[^"]*">', '<meta property="og:image" content="https://pedro-pinczura-portfolio.vercel.app/public/media/rpg/hero.webp">', text, count=1)
+    text = re.sub(r'<meta property="og:image:alt" content="[^"]*">', '<meta property="og:image:alt" content="RPG Project — Unity systems case study">', text, count=1)
+    text = re.sub(r'<meta name="twitter:image" content="[^"]*">', '<meta name="twitter:image" content="https://pedro-pinczura-portfolio.vercel.app/public/media/rpg/hero.webp">', text, count=1)
+    p.write_text(text, encoding="utf-8")
+
+# Upgrade the RPG card on the Work listing.
+replace_once(
+    "dist/work.html",
+    '<a class="workcard" data-tags="rpg gameplay" href="rpg-systems.html"><div class="workmedia"><span class="ey">UNITY / CASE STUDY IN PROGRESS</span><strong>RPG Systems</strong></div><div class="workcopy"><b>Combat, inventory, dialogue, quests & abilities</b><p>Project overview available · <strong class="scan-key">full case study coming soon</strong>.</p></div></a>',
+    '<a class="workcard" data-tags="rpg gameplay" href="rpg-systems.html"><div class="workmedia covered"><img src="public/media/rpg/hero.webp" alt="RPG Project low-poly fantasy key art" loading="lazy" decoding="async"><span class="ey">UNITY / SYSTEMS CASE STUDY</span><strong>RPG Systems</strong></div><div class="workcopy"><b>Combat, AI, inventory, progression & persistence</b><p>Interconnected RPG systems built in <strong class="scan-key">Unity / C#</strong>.</p></div></a>'
+)
+replace_once(
+    "dist/es/work.html",
+    '<a class="workcard" data-tags="rpg gameplay" href="rpg-systems.html"><div class="workmedia"><span class="ey">UNITY / CASO DE ESTUDIO EN PREPARACIÓN</span><strong>RPG Systems</strong></div><div class="workcopy"><b>Combate, inventario, diálogo, misiones y habilidades</b><p>Resumen disponible · caso de estudio completo próximamente.</p></div></a>',
+    '<a class="workcard" data-tags="rpg gameplay" href="rpg-systems.html"><div class="workmedia covered"><img src="../public/media/rpg/hero.webp" alt="Key art low-poly de RPG Project" loading="lazy" decoding="async"><span class="ey">UNITY / CASO DE ESTUDIO DE SISTEMAS</span><strong>RPG Systems</strong></div><div class="workcopy"><b>Combate, IA, inventario, progresión y persistencia</b><p>Sistemas RPG interconectados construidos en <strong>Unity / C#</strong>.</p></div></a>'
+)
+
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== RPG Systems case study V1 ===== */
+.rpg-pagehero{padding:78px 0 52px}
+.rpg-pagehero .back{display:inline-block;margin-bottom:64px}
+.rpg-pagehero h1{margin:12px 0 22px;font-size:clamp(68px,11vw,150px);line-height:.8;letter-spacing:-.075em}
+.rpg-lead{max-width:900px;color:#aeb8c5;font-size:clamp(18px,2vw,27px)}
+.rpg-meta{display:grid;grid-template-columns:repeat(4,1fr);margin-top:54px;border-top:1px solid var(--l);border-bottom:1px solid var(--l)}
+.rpg-meta>div{padding:18px 16px 18px 0;display:grid;gap:7px}
+.rpg-meta span{font:10px ui-monospace;color:#788595;letter-spacing:.1em}
+.rpg-meta strong{font-size:14px}
+.rpg-hero{position:relative;aspect-ratio:16/9;border:1px solid var(--l);overflow:hidden;background:#0c1118}
+.rpg-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rpg-hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,7,10,.01) 48%,rgba(4,7,10,.82))}
+.rpg-hero-caption{position:absolute;z-index:2;left:32px;bottom:28px;display:grid;gap:8px}
+.rpg-hero-caption strong{font-size:clamp(26px,4vw,58px);line-height:.87;letter-spacing:-.055em}
+.rpg-overview{padding:92px 0 115px}
+.rpg-overview-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(46px,8vw,120px);align-items:start}
+.rpg-overview h2,.rpg-sectionhead h2{margin:10px 0 0;font-size:clamp(48px,6.4vw,88px);line-height:.87;letter-spacing:-.06em}
+.rpg-overview p,.rpg-sectionhead>p{color:#b0bac7;font-size:17px;max-width:58ch}
+.rpg-section{padding:110px 0;border-top:1px solid var(--l)}
+.rpg-section-alt{background:linear-gradient(180deg,rgba(18,23,31,.22),rgba(18,23,31,.06))}
+.rpg-sectionhead{display:grid;grid-template-columns:1.12fr .72fr;gap:clamp(40px,7vw,100px);align-items:end;margin-bottom:38px}
+.rpg-media-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;align-items:stretch}
+.rpg-media{margin:0;border:1px solid var(--l);background:#090d12;overflow:hidden;min-width:0}
+.rpg-media video,.rpg-media img{display:block;width:100%;height:100%;object-fit:cover}
+.rpg-video-card{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:430px}
+.rpg-video-card video{aspect-ratio:16/9;object-fit:cover}
+.rpg-inspector-card{display:grid;grid-template-rows:minmax(0,1fr) auto}
+.rpg-inspector-card img{object-fit:contain;background:#24282d;padding:12px}
+.rpg-media figcaption{display:grid;gap:4px;padding:14px 16px;border-top:1px solid var(--l);color:#b3bdca;font-size:12px}
+.rpg-media figcaption span{font:9px ui-monospace;color:var(--b2);letter-spacing:.1em}
+.rpg-media figcaption strong{font-size:13px;color:#dce3ec}
+.rpg-wide-media{margin:0;border:1px solid var(--l);background:#090d12;overflow:hidden}
+.rpg-wide-media img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.rpg-wide-media figcaption{padding:12px 15px;color:#8f9baa;border-top:1px solid var(--l);font-size:12px}
+.rpg-code-row{display:grid;grid-template-columns:.8fr 1.2fr;gap:16px;margin-top:16px}
+.rpg-code-copy{border:1px solid var(--l);padding:32px;background:rgba(18,23,31,.5)}
+.rpg-code-copy h3{font-size:clamp(28px,3vw,45px);line-height:.92;letter-spacing:-.045em;margin:10px 0 16px}
+.rpg-code-copy p{color:#9faab8}
+.rpg-code-card{border:1px solid var(--l);background:#090d12;min-width:0;display:flex;flex-direction:column}
+.rpg-code-head{padding:15px 18px;border-bottom:1px solid var(--l);display:flex;justify-content:space-between;gap:14px;align-items:center}
+.rpg-code-head span{font:10px ui-monospace;color:var(--b2)}
+.rpg-code-head strong{font-size:14px}
+.rpg-code-card pre{margin:0;padding:20px;overflow:auto;color:#d8e8ff;font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}
+.rpg-code-note{margin:auto 0 0;padding:14px 18px;border-top:1px solid var(--l);color:#8f9baa;font-size:12px}
+.rpg-inventory-shot img{aspect-ratio:16/9}
+.rpg-inventory-grid{grid-template-columns:1fr 1fr;margin-top:16px}
+.rpg-progression-grid{display:grid;grid-template-columns:.55fr 1.45fr;gap:16px;align-items:stretch}
+.rpg-progression-grid .rpg-inspector-card{min-height:430px}
+.rpg-code-card-center{justify-content:center}
+.rpg-persistence-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}
+.rpg-portal-video{min-height:390px}
+.rpg-state-card{border:1px solid var(--l);padding:32px;background:radial-gradient(circle at 86% 8%,rgba(47,128,255,.14),transparent 30%),rgba(18,23,31,.5)}
+.rpg-state-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:24px}
+.rpg-state-grid span{padding:13px 14px;border:1px solid var(--l);font-size:13px;color:#c1c9d4}
+.rpg-architecture{padding:115px 0 130px;border-top:1px solid var(--l)}
+.rpg-arch-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--l);border-bottom:1px solid var(--l)}
+.rpg-arch-grid article{position:relative;min-height:250px;padding:22px;border-right:1px solid var(--l)}
+.rpg-arch-grid article:last-child{border-right:0}
+.rpg-arch-grid article>span{font:9px ui-monospace;color:#647080}
+.rpg-arch-grid code{display:block;margin:46px 0 16px;color:var(--b2);font:700 clamp(18px,2vw,28px) ui-monospace}
+.rpg-arch-grid p{color:#929eae;font-size:13px}
+@media(hover:hover){
+  .rpg-media video,.rpg-wide-media img,.rpg-hero>img{transition:transform .45s cubic-bezier(.2,.75,.2,1)}
+  .rpg-media:hover video,.rpg-wide-media:hover img{transform:scale(1.012)}
+}
+@media(max-width:900px){
+  .rpg-meta{grid-template-columns:1fr 1fr}
+  .rpg-overview-grid,.rpg-sectionhead,.rpg-media-grid,.rpg-code-row,.rpg-progression-grid,.rpg-persistence-grid{grid-template-columns:1fr}
+  .rpg-arch-grid{grid-template-columns:1fr 1fr}
+  .rpg-arch-grid article:nth-child(2){border-right:0}
+  .rpg-arch-grid article:nth-child(-n+2){border-bottom:1px solid var(--l)}
+  .rpg-inspector-card img{max-height:540px}
+}
+@media(max-width:620px){
+  .rpg-pagehero{padding-top:58px}
+  .rpg-pagehero .back{margin-bottom:44px}
+  .rpg-pagehero h1{font-size:clamp(58px,16vw,94px)}
+  .rpg-meta{grid-template-columns:1fr}
+  .rpg-hero-caption{left:18px;bottom:17px}
+  .rpg-overview,.rpg-section,.rpg-architecture{padding-top:78px;padding-bottom:82px}
+  .rpg-sectionhead h2,.rpg-overview h2{font-size:clamp(42px,12vw,62px)}
+  .rpg-video-card{min-height:0}
+  .rpg-code-copy,.rpg-state-card{padding:22px}
+  .rpg-code-card pre{font-size:10px;padding:16px}
+  .rpg-code-head{align-items:flex-start;flex-direction:column;gap:4px}
+  .rpg-arch-grid{grid-template-columns:1fr}
+  .rpg-arch-grid article{min-height:190px;border-right:0;border-bottom:1px solid var(--l)}
+  .rpg-arch-grid article:nth-child(2){border-right:0}
+  .rpg-arch-grid article:last-child{border-bottom:0}
+  .rpg-arch-grid code{margin-top:28px}
+}
+''', encoding="utf-8")
+PY
