@@ -4438,13 +4438,13 @@ def patch_page(path, es=False):
         )
         text=replace_required(
             text,
-            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, Animator Override, daño y rango</strong></figcaption>',
+            '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, animaciones, daño y rango</strong></figcaption>',
             '<figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, Animator Override, mano, rango y modificadores de daño</strong></figcaption>',
             'ES sword config caption'
         )
         text=replace_required(
             text,
-            '<figcaption><span>GAMEPLAY MELEE</span><strong>Combate con espada → timing de ataque → daño → derrota del enemigo</strong></figcaption>',
+            '<figcaption><span>GAMEPLAY MELEE</span><strong>Espada → timing de ataque → daño → derrota del enemigo</strong></figcaption>',
             '<figcaption><span>GAMEPLAY MELEE</span><strong>Espada → golpes melee → daño → derrota del enemigo → XP</strong></figcaption>',
             'ES sword video caption'
         )
@@ -4485,7 +4485,7 @@ var sourceContainer = source as IDragContainer&lt;T&gt;;
 
 if (destinationContainer == null || sourceContainer == null ||
     destinationContainer.GetItem() == null ||
-    ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
+    object.ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
 {
     AttemptSimpleTransfer(destination);
     return;
@@ -4583,7 +4583,7 @@ var sourceContainer = source as IDragContainer&lt;T&gt;;
 
 if (destinationContainer == null || sourceContainer == null ||
     destinationContainer.GetItem() == null ||
-    ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
+    object.ReferenceEquals(destinationContainer.GetItem(), sourceContainer.GetItem()))
 {
     AttemptSimpleTransfer(destination);
     return;
