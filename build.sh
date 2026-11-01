@@ -4798,7 +4798,7 @@ CSS
 
 # ===== HOME PERSONAL PROJECTS COVER V1 =====
 mkdir -p dist/public/media/personal-projects
-cat assets/personal-projects-home/part-*.txt | base64 -d > dist/public/media/personal-projects/cover-home.webp
+cp assets/personal-projects-home/cover-home.webp dist/public/media/personal-projects/cover-home.webp
 
 python3 - <<'PY'
 from pathlib import Path
