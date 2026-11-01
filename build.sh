@@ -4347,3 +4347,69 @@ css.write_text(css.read_text(encoding="utf-8")+r'''
 }
 ''',encoding="utf-8")
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V4 / GALLERY CLEANUP =====
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+def patch_rpg(path, es=False):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+
+    # Inventory showcase: use the clip where bow and sword are swapped through equipment.
+    section_pattern = (
+        r'(<section class="rpg-section">\s*<div class="c">\s*'
+        r'<div class="rpg-sectionhead">.*?'
+        r'(?:03 / Inventory & equipment|03 / Inventario y equipamiento).*?'
+        r'</div>.*?</section>)'
+    )
+    m = re.search(section_pattern, text, flags=re.S)
+    if not m:
+        raise SystemExit(f"Inventory section not found in {path}")
+
+    section = m.group(1)
+    if 'inventory-equipment.mp4' not in section:
+        raise SystemExit(f"Expected inventory-equipment.mp4 not found in inventory section: {path}")
+
+    section = section.replace('inventory-equipment.mp4', 'inventory2.mp4', 1)
+
+    if es:
+        section = section.replace(
+            '<figcaption><span>INTERACCIÓN</span><strong>Drag & drop entre inventario y equipamiento</strong></figcaption>',
+            '<figcaption><span>INTERACCIÓN</span><strong>Cambio de arco ↔ espada entre inventario y equipamiento</strong></figcaption>',
+            1
+        )
+    else:
+        section = section.replace(
+            '<figcaption><span>INTERACTION</span><strong>Drag & drop between inventory and equipment</strong></figcaption>',
+            '<figcaption><span>INTERACTION</span><strong>Swap bow ↔ sword between inventory and equipment</strong></figcaption>',
+            1
+        )
+
+    text = text[:m.start(1)] + section + text[m.end(1):]
+
+    # Steam gallery: keep gameplay, world and AI material; remove Inspector-only entries.
+    inspector_sources = ('weapon-config.webp', 'bow-weapon-config.webp', 'helmet-modifier.webp')
+    removed = 0
+    for src in inspector_sources:
+        pattern = (
+            r'<button class="rpg-steam-thumb[^"]*"[^>]*'
+            r'data-src="[^"]*' + re.escape(src) +
+            r'"[^>]*>.*?</button>'
+        )
+        text, n = re.subn(pattern, '', text, count=1, flags=re.S)
+        removed += n
+
+    if removed != 3:
+        raise SystemExit(f"Expected to remove 3 Inspector gallery thumbs from {path}, removed {removed}")
+
+    # Initial gallery counter is static until the first interaction; JS uses thumbs.length afterwards.
+    text = text.replace('<span>01 / 16</span>', '<span>01 / 13</span>', 1)
+
+    p.write_text(text, encoding="utf-8")
+
+patch_rpg("dist/rpg-systems.html", es=False)
+patch_rpg("dist/es/rpg-systems.html", es=True)
+PY
