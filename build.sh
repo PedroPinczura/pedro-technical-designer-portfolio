@@ -4032,3 +4032,48 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 PY
+
+
+# ===== RPG PROJECT GALLERY PANORAMAS V2 =====
+python3 - <<'PY'
+from pathlib import Path
+
+def inject(path, anchor, extra):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    if extra.strip() in text:
+        return
+    if anchor not in text:
+        raise SystemExit(f"RPG gallery anchor missing in {path}")
+    p.write_text(text.replace(anchor, anchor + extra, 1), encoding="utf-8")
+
+inject(
+    "dist/rpg-systems.html",
+    '''<figcaption>RPG Project — world key art.</figcaption>
+      </figure>''',
+    '''
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/gallery-village-overview.webp" data-alt="Wide Unity Scene View of the RPG Project village" data-caption="Village overview — level composition, paths, river and landmarks."><img src="public/media/rpg/gallery-village-overview.webp" alt="Wide Unity Scene View of the RPG Project village" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Village overview and level composition.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/gallery-village-ingame.webp" data-alt="RPG Project village viewed in Unity" data-caption="Playable world overview with village, river, bridge, tents and portal."><img src="public/media/rpg/gallery-village-ingame.webp" alt="RPG Project village viewed in Unity" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Playable world overview.</figcaption>
+      </figure>'''
+)
+
+inject(
+    "dist/es/rpg-systems.html",
+    '''<figcaption>RPG Project — key art del mundo.</figcaption>
+      </figure>''',
+    '''
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/gallery-village-overview.webp" data-alt="Vista panorámica de la aldea de RPG Project en Unity" data-caption="Vista general de la aldea — composición del nivel, caminos, río y landmarks."><img src="../public/media/rpg/gallery-village-overview.webp" alt="Vista panorámica de la aldea de RPG Project en Unity" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Vista general y composición del nivel.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/gallery-village-ingame.webp" data-alt="Mundo jugable de RPG Project visto en Unity" data-caption="Vista del mundo jugable con aldea, río, puente, tiendas y portal."><img src="../public/media/rpg/gallery-village-ingame.webp" alt="Mundo jugable de RPG Project visto en Unity" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Vista general del mundo jugable.</figcaption>
+      </figure>'''
+)
+PY
