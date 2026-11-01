@@ -4077,3 +4077,273 @@ inject(
       </figure>'''
 )
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V3 / STEAM GALLERY =====
+# Higher-quality media overlay. These are extracted last so they replace the lighter V1/V2 exports.
+mkdir -p dist/public/media/rpg
+
+base64 -d rpg-assets-v3/images-hq.b64 > rpg-v3-images.tar.gz
+tar -xzf rpg-v3-images.tar.gz -C dist/public/media/rpg
+rm -f rpg-v3-images.tar.gz
+
+base64 -d rpg-assets-v3/sword-720.b64 > rpg-v3-sword.tar.gz
+tar -xzf rpg-v3-sword.tar.gz -C dist/public/media/rpg
+rm -f rpg-v3-sword.tar.gz
+
+base64 -d rpg-assets-v3/inventory-720.b64 > rpg-v3-inventory.tar.gz
+tar -xzf rpg-v3-inventory.tar.gz -C dist/public/media/rpg
+rm -f rpg-v3-inventory.tar.gz
+
+base64 -d rpg-assets-v3/ranged-portals-720.b64 > rpg-v3-ranged-portals.tar.gz
+tar -xzf rpg-v3-ranged-portals.tar.gz -C dist/public/media/rpg
+rm -f rpg-v3-ranged-portals.tar.gz
+
+cat rpg-assets-v3/gallery-extra-hq-part-*.b64 | base64 -d > rpg-v3-gallery-extra.tar.gz
+tar -xzf rpg-v3-gallery-extra.tar.gz -C dist
+rm -f rpg-v3-gallery-extra.tar.gz
+
+base64 -d rpg-assets-v3/posters.b64 > rpg-v3-posters.tar.gz
+tar -xzf rpg-v3-posters.tar.gz -C dist
+rm -f rpg-v3-posters.tar.gz
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+import html
+
+def replace_regex(path, pattern, replacement, count=1):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    text,n=re.subn(pattern,replacement,text,count=count,flags=re.S)
+    if n != count:
+        raise SystemExit(f"Expected {count} replacement(s) in {path}, got {n}")
+    p.write_text(text,encoding="utf-8")
+
+# Rename the project everywhere users encounter its title.
+for path in ("dist/rpg-systems.html","dist/es/rpg-systems.html"):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    text=text.replace("RPG Systems — Pedro Pinczura","RPG Project — Pedro Pinczura")
+    text=text.replace("RPG Systems — caso de estudio","RPG Project — caso de estudio")
+    text=text.replace("RPG Systems — Unity/C#","RPG Project — Unity/C#")
+    p.write_text(text,encoding="utf-8")
+
+for path in ("dist/work.html","dist/es/work.html"):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    text=text.replace("<strong>RPG Systems</strong>","<strong>RPG Project</strong>")
+    p.write_text(text,encoding="utf-8")
+
+# Real Bow WeaponConfig replaces the temporary descriptive card.
+en_ranged = r'''<article class="rpg-weapon-pair rpg-weapon-pair-ranged">
+        <figure class="rpg-media rpg-inspector-card">
+          <img src="public/media/rpg/bow-weapon-config.webp" alt="Unity Inspector showing the RED Bow Enemy WeaponConfig with range and projectile data" loading="lazy" decoding="async">
+          <figcaption><span>BOW / WEAPONCONFIG</span><strong>Ranged configuration: Animator Override, 20 range and Red Arrow projectile</strong></figcaption>
+        </figure>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Ranged combat gameplay showing bow projectiles, damage and enemy defeat">
+            <source src="public/media/rpg/ranged-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>RANGED GAMEPLAY</span><strong>Bow → projectile → impact → damage → XP</strong></figcaption>
+        </figure>
+      </article>'''
+
+es_ranged = r'''<article class="rpg-weapon-pair rpg-weapon-pair-ranged">
+        <figure class="rpg-media rpg-inspector-card">
+          <img src="../public/media/rpg/bow-weapon-config.webp" alt="Inspector de Unity mostrando RED Bow Enemy WeaponConfig con rango y proyectil" loading="lazy" decoding="async">
+          <figcaption><span>BOW / WEAPONCONFIG</span><strong>Configuración ranged: Animator Override, rango 20 y proyectil Red Arrow</strong></figcaption>
+        </figure>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Gameplay de combate ranged con arco, proyectiles, daño y derrota del enemigo">
+            <source src="../public/media/rpg/ranged-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>GAMEPLAY RANGED</span><strong>Arco → proyectil → impacto → daño → XP</strong></figcaption>
+        </figure>
+      </article>'''
+
+replace_regex(
+    "dist/rpg-systems.html",
+    r'<article class="rpg-weapon-pair rpg-weapon-pair-ranged">.*?</article>',
+    en_ranged
+)
+replace_regex(
+    "dist/es/rpg-systems.html",
+    r'<article class="rpg-weapon-pair rpg-weapon-pair-ranged">.*?</article>',
+    es_ranged
+)
+
+def gallery_html(prefix="", es=False):
+    items = [
+        ("image","hero.webp","hero.webp",
+         "RPG Project — key art" if not es else "RPG Project — key art",
+         "Low-poly fantasy key art for RPG Project." if not es else "Key art low-poly de RPG Project."),
+        ("video","sword-combat.mp4","poster-sword.webp",
+         "Sword combat" if not es else "Combate con espada",
+         "Melee combat, attack timing and enemy defeat." if not es else "Combate melee, timing de ataque y derrota del enemigo."),
+        ("video","ranged-combat.mp4","poster-ranged.webp",
+         "Ranged combat" if not es else "Combate ranged",
+         "Bow projectiles, impacts, damage and XP." if not es else "Proyectiles de arco, impactos, daño y XP."),
+        ("video","inventory-equipment.mp4","poster-inventory.webp",
+         "Inventory & action bar" if not es else "Inventario y action bar",
+         "Equipping an item and moving a potion into the action bar." if not es else "Equipar un objeto y mover una poción a la action bar."),
+        ("video","inventory2.mp4","poster-inventory2.webp",
+         "Inventory & equipment" if not es else "Inventario y equipamiento",
+         "Additional inventory and equipment interaction capture." if not es else "Captura adicional de interacción entre inventario y equipamiento."),
+        ("video","portals.mp4","poster-portals.webp",
+         "Portal transition" if not es else "Transición de portal",
+         "Scene transition and persistent player repositioning." if not es else "Transición de escena y reposicionamiento persistente del jugador."),
+        ("video","cinematic.mp4","poster-cinematic.webp",
+         "Cinematic integration" if not es else "Integración de cinemática",
+         "Timeline-driven cinematic integrated with player control." if not es else "Cinemática con Timeline integrada con el control del jugador."),
+        ("image","inventory-equipment.webp","inventory-equipment.webp",
+         "Inventory UI" if not es else "UI de inventario",
+         "Inventory, equipment slots and action bar." if not es else "Inventario, slots de equipo y action bar."),
+        ("image","weapon-config.webp","weapon-config.webp",
+         "Sword WeaponConfig","Data-driven melee weapon configuration." if not es else "Configuración data-driven del arma melee."),
+        ("image","bow-weapon-config.webp","bow-weapon-config.webp",
+         "Bow WeaponConfig","Data-driven ranged weapon configuration." if not es else "Configuración data-driven del arma ranged."),
+        ("image","helmet-modifier.webp","helmet-modifier.webp",
+         "Equipment modifier" if not es else "Modificador de equipamiento",
+         "Healthy Helmet additive Max Health modifier." if not es else "Healthy Helmet y su modificador aditivo de Max Health."),
+        ("image","enemy-ai-path.webp","enemy-ai-path.webp",
+         "Enemy AI paths" if not es else "Rutas de IA enemiga",
+         "Scene-authored patrol paths and encounter layout." if not es else "Rutas de patrulla y encuentros configurados en Scene View."),
+        ("image","gallery-village-ingame.webp","gallery-village-ingame.webp",
+         "World overview A" if not es else "Vista del mundo A",
+         "Playable village, river, bridge, tents and portal." if not es else "Aldea jugable, río, puente, tiendas y portal."),
+        ("image","gallery-village-overview.webp","gallery-village-overview.webp",
+         "World overview B" if not es else "Vista del mundo B",
+         "Wide level composition and landmarks." if not es else "Composición general del nivel y landmarks."),
+        ("image","gallery-scene-tower.webp","gallery-scene-tower.webp",
+         "World overview C" if not es else "Vista del mundo C",
+         "Elevated Scene View across the village." if not es else "Scene View elevada de la aldea."),
+        ("image","gallery-scene-village.webp","gallery-scene-village.webp",
+         "World overview D" if not es else "Vista del mundo D",
+         "Additional village composition and playable space." if not es else "Composición adicional de la aldea y espacio jugable."),
+    ]
+
+    thumbs=[]
+    for i,(kind,src,poster,title,caption) in enumerate(items):
+        active=" is-active" if i==0 else ""
+        play='<span class="rpg-steam-play" aria-hidden="true">▶</span>' if kind=="video" else ""
+        thumbs.append(
+            f'''<button class="rpg-steam-thumb{active}" type="button" data-kind="{kind}" data-src="{prefix}public/media/rpg/{src}" data-title="{html.escape(title,quote=True)}" data-caption="{html.escape(caption,quote=True)}" aria-label="{html.escape(title,quote=True)}"><img src="{prefix}public/media/rpg/{poster}" alt="" loading="lazy" decoding="async">{play}</button>'''
+        )
+
+    eyebrow="07 / Galería" if es else "07 / Gallery"
+    heading='GALERÍA DEL<br><span class="blue">PROYECTO.</span>' if es else 'PROJECT<br><span class="blue">GALLERY.</span>'
+    lead=("Todas las capturas y vídeos del proyecto en un visor único: selecciona cualquier thumbnail para cambiar el contenido principal."
+          if es else
+          "Every project capture and video in one viewer. Select any thumbnail to switch the main media.")
+    default_caption="Key art low-poly de RPG Project." if es else "Low-poly fantasy key art for RPG Project."
+    prev_label="Anterior" if es else "Previous"
+    next_label="Siguiente" if es else "Next"
+
+    return f'''
+<section class="rpg-gallery rpg-steam-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">{eyebrow}</div><h2>{heading}</h2></div>
+      <p>{lead}</p>
+    </div>
+    <div class="rpg-steam-gallery" data-index="0">
+      <div class="rpg-steam-stage">
+        <div class="rpg-steam-media"><img src="{prefix}public/media/rpg/hero.webp" alt="RPG Project key art"></div>
+        <button class="rpg-steam-arrow rpg-steam-prev" type="button" aria-label="{prev_label}">←</button>
+        <button class="rpg-steam-arrow rpg-steam-next" type="button" aria-label="{next_label}">→</button>
+        <div class="rpg-steam-caption"><span>01 / {len(items):02d}</span><div><strong>RPG Project — key art</strong><p>{default_caption}</p></div></div>
+      </div>
+      <div class="rpg-steam-thumbs" role="list" aria-label="RPG Project media">
+        {''.join(thumbs)}
+      </div>
+    </div>
+  </div>
+</section>'''
+
+for path,prefix,es in [
+    ("dist/rpg-systems.html","",False),
+    ("dist/es/rpg-systems.html","../",True),
+]:
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    # Replace the old grid gallery and lightbox with the Steam-style viewer.
+    text,n=re.subn(
+        r'<section class="rpg-gallery">.*?</section>\s*<dialog class="rpg-lightbox".*?</dialog>',
+        gallery_html(prefix,es),
+        text,
+        count=1,
+        flags=re.S,
+    )
+    if n != 1:
+        raise SystemExit(f"Old RPG gallery not found in {path}")
+
+    # Old lightbox script is harmless but remove it to keep the page clean.
+    text=re.sub(
+        r'<script>\s*\(\(\)=>\{const d=document\.querySelector\(\'\.rpg-lightbox\'\);.*?</script>',
+        '',
+        text,
+        flags=re.S,
+    )
+
+    steam_script = r'''<script>
+(()=>{const g=document.querySelector('.rpg-steam-gallery');if(!g)return;
+const media=g.querySelector('.rpg-steam-media'),caption=g.querySelector('.rpg-steam-caption'),
+thumbs=[...g.querySelectorAll('.rpg-steam-thumb')],prev=g.querySelector('.rpg-steam-prev'),next=g.querySelector('.rpg-steam-next');
+let index=0;
+function show(i){
+  index=(i+thumbs.length)%thumbs.length;
+  const b=thumbs[index],kind=b.dataset.kind,src=b.dataset.src,title=b.dataset.title||'',copy=b.dataset.caption||'';
+  media.replaceChildren();
+  if(kind==='video'){
+    const v=document.createElement('video');
+    v.src=src;v.controls=true;v.autoplay=true;v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
+    v.setAttribute('aria-label',title);media.appendChild(v);v.play().catch(()=>{});
+  }else{
+    const img=document.createElement('img');img.src=src;img.alt=title;media.appendChild(img);
+  }
+  caption.querySelector('span').textContent=String(index+1).padStart(2,'0')+' / '+String(thumbs.length).padStart(2,'0');
+  caption.querySelector('strong').textContent=title;
+  caption.querySelector('p').textContent=copy;
+  thumbs.forEach((t,j)=>{t.classList.toggle('is-active',j===index);t.setAttribute('aria-current',j===index?'true':'false')});
+  b.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+thumbs.forEach((b,i)=>b.addEventListener('click',()=>show(i)));
+prev.addEventListener('click',()=>show(index-1));next.addEventListener('click',()=>show(index+1));
+g.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();show(index-1)}if(e.key==='ArrowRight'){e.preventDefault();show(index+1)}});
+})();</script>'''
+    text=text.replace('</main>',steam_script+'</main>',1)
+    p.write_text(text,encoding="utf-8")
+
+css=Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8")+r'''
+
+/* ===== RPG PROJECT CASE STUDY V3 / STEAM GALLERY ===== */
+.rpg-weapon-pair-ranged .rpg-inspector-card img{max-height:520px;object-fit:contain;background:#24282d}
+.rpg-steam-section{padding-bottom:130px}
+.rpg-steam-gallery{border:1px solid var(--l);background:#080b0f;padding:12px}
+.rpg-steam-stage{position:relative;aspect-ratio:16/9;background:#030507;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.rpg-steam-media{position:absolute;inset:0;display:grid;place-items:center;background:#030507}
+.rpg-steam-media img,.rpg-steam-media video{width:100%;height:100%;object-fit:contain;background:#030507}
+.rpg-steam-arrow{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:44px;height:58px;border:1px solid rgba(255,255,255,.18);background:rgba(4,7,10,.72);color:#fff;font-size:24px;cursor:pointer;opacity:.78;transition:.18s}
+.rpg-steam-arrow:hover,.rpg-steam-arrow:focus-visible{opacity:1;border-color:rgba(105,168,255,.65);background:rgba(10,17,26,.9)}
+.rpg-steam-prev{left:12px}.rpg-steam-next{right:12px}
+.rpg-steam-caption{position:absolute;z-index:2;left:0;right:0;bottom:0;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:end;padding:44px 18px 16px;background:linear-gradient(180deg,transparent,rgba(3,5,7,.92));pointer-events:none}
+.rpg-steam-caption>span{font:10px ui-monospace;color:var(--b2);letter-spacing:.08em}
+.rpg-steam-caption strong{font-size:16px}
+.rpg-steam-caption p{margin:3px 0 0;color:#9ba6b5;font-size:12px}
+.rpg-steam-thumbs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(126px,156px);gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.rpg-steam-thumb{position:relative;aspect-ratio:16/9;padding:0;border:2px solid transparent;background:#111820;overflow:hidden;cursor:pointer;scroll-snap-align:start;opacity:.64;transition:opacity .18s,border-color .18s,transform .18s}
+.rpg-steam-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.rpg-steam-thumb:hover{opacity:.92}
+.rpg-steam-thumb.is-active{opacity:1;border-color:var(--b2);transform:translateY(-1px)}
+.rpg-steam-play{position:absolute;left:8px;bottom:7px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;padding-left:2px;background:rgba(3,5,7,.8);border:1px solid rgba(255,255,255,.25);font-size:10px;color:#fff}
+@media(max-width:700px){
+  .rpg-steam-gallery{padding:7px}
+  .rpg-steam-arrow{width:38px;height:50px}
+  .rpg-steam-caption{padding:36px 12px 11px;gap:10px}
+  .rpg-steam-caption p{display:none}
+  .rpg-steam-thumbs{grid-auto-columns:112px}
+}
+''',encoding="utf-8")
+PY
