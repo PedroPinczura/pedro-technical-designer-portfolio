@@ -4684,3 +4684,113 @@ patch("dist/es/rpg-systems.html",[
     ),
 ])
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V7 / RICHER STAT PIPELINE =====
+python3 - <<'PY'
+from pathlib import Path
+
+def patch(path, es=False):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+
+    if es:
+        old='''<div class="rpg-code-card rpg-code-card-center">
+        <div class="rpg-code-head"><span>BaseStats.cs</span><strong>Pipeline de stat final</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}</code></pre>
+        <p class="rpg-code-note">La clase y el nivel definen el valor base; el equipo puede extenderlo sin que BaseStats conozca el tipo concreto de objeto.</p>
+      </div>'''
+        new='''<div class="rpg-code-card rpg-code-card-center rpg-stat-code">
+        <div class="rpg-code-head"><span>BaseStats.cs + StatsEquipment.cs</span><strong>Pipeline de stats y modificadores</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}
+
+private float GetAdditiveModifier(Stat stat)
+{
+    float total = 0;
+
+    foreach (IModifierProvider provider in GetComponents&lt;IModifierProvider&gt;())
+        foreach (float modifier in provider.GetAdditiveModifiers(stat))
+            total += modifier;
+
+    return total;
+}</code></pre>
+        <div class="rpg-code-divider"></div>
+        <pre><code>public IEnumerable&lt;float&gt; GetAdditiveModifiers(Stat stat)
+{
+    foreach (var slot in GetAllPopulatedSlots())
+    {
+        var item = GetItemInSlot(slot) as IModifierProvider;
+        if (item == null) continue;
+
+        foreach (float modifier in item.GetAdditiveModifiers(stat))
+            yield return modifier;
+    }
+}</code></pre>
+        <p class="rpg-code-note">BaseStats agrega cualquier <strong>IModifierProvider</strong> del personaje; StatsEquipment actúa como puente y reenvía los modificadores de los objetos equipados, como el +10 Max Health del casco mostrado al lado.</p>
+      </div>'''
+    else:
+        old='''<div class="rpg-code-card rpg-code-card-center">
+        <div class="rpg-code-head"><span>BaseStats.cs</span><strong>Final stat pipeline</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}</code></pre>
+        <p class="rpg-code-note">Character class and level define the base value; equipment can extend it without BaseStats knowing the concrete item type.</p>
+      </div>'''
+        new='''<div class="rpg-code-card rpg-code-card-center rpg-stat-code">
+        <div class="rpg-code-head"><span>BaseStats.cs + StatsEquipment.cs</span><strong>Stat & modifier pipeline</strong></div>
+        <pre><code>public float GetStat(Stat stat)
+{
+    return (GetBaseStat(stat) + GetAdditiveModifier(stat))
+        * (1 + GetPercentageModifier(stat) / 100);
+}
+
+private float GetAdditiveModifier(Stat stat)
+{
+    float total = 0;
+
+    foreach (IModifierProvider provider in GetComponents&lt;IModifierProvider&gt;())
+        foreach (float modifier in provider.GetAdditiveModifiers(stat))
+            total += modifier;
+
+    return total;
+}</code></pre>
+        <div class="rpg-code-divider"></div>
+        <pre><code>public IEnumerable&lt;float&gt; GetAdditiveModifiers(Stat stat)
+{
+    foreach (var slot in GetAllPopulatedSlots())
+    {
+        var item = GetItemInSlot(slot) as IModifierProvider;
+        if (item == null) continue;
+
+        foreach (float modifier in item.GetAdditiveModifiers(stat))
+            yield return modifier;
+    }
+}</code></pre>
+        <p class="rpg-code-note">BaseStats aggregates any <strong>IModifierProvider</strong> on the character; StatsEquipment bridges equipped items into that pipeline, including the +10 Max Health helmet shown beside it.</p>
+      </div>'''
+
+    if old not in text:
+        raise SystemExit(f"Stat code block not found in {path}")
+    p.write_text(text.replace(old,new,1),encoding="utf-8")
+
+patch("dist/rpg-systems.html",False)
+patch("dist/es/rpg-systems.html",True)
+PY
+
+cat >> dist/style.css <<'CSS'
+
+/* ===== RPG PROJECT CASE STUDY V7 / STAT PIPELINE ===== */
+.rpg-stat-code pre{margin:0}
+.rpg-stat-code .rpg-code-divider{height:1px;background:rgba(255,255,255,.08);margin:18px 0}
+.rpg-stat-code .rpg-code-note{margin-top:18px}
+CSS
