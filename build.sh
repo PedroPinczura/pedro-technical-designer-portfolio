@@ -3713,3 +3713,321 @@ css.write_text(css.read_text(encoding="utf-8") + r'''
 }
 ''', encoding="utf-8")
 PY
+
+
+# ===== RPG PROJECT CASE STUDY V2 =====
+# Optional media overlay. When present it replaces selected V1 media with higher-quality encodes.
+if [ -f rpg-assets/rpg-v2-assets.b64 ]; then
+  base64 -d rpg-assets/rpg-v2-assets.b64 > rpg-v2-assets.tar.gz
+  tar -xzf rpg-v2-assets.tar.gz -C dist
+  rm -f rpg-v2-assets.tar.gz
+fi
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+def replace_once(path, old, new, required=True):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    if old not in text:
+        if required:
+            raise SystemExit(f"Expected text not found in {path}: {old[:100]}")
+        return False
+    p.write_text(text.replace(old, new, 1), encoding="utf-8")
+    return True
+
+def replace_section(path, marker, replacement):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    # Find the section containing the unique marker and replace that whole top-level section.
+    idx = text.find(marker)
+    if idx < 0:
+        raise SystemExit(f"Marker not found in {path}: {marker}")
+    start = text.rfind('<section', 0, idx)
+    if start < 0:
+        raise SystemExit(f"Section start not found in {path}: {marker}")
+    end = text.find('</section>', idx)
+    if end < 0:
+        raise SystemExit(f"Section end not found in {path}: {marker}")
+    end += len('</section>')
+    p.write_text(text[:start] + replacement + text[end:], encoding="utf-8")
+
+# Display name: RPG Project everywhere this case study is surfaced.
+for path in ("dist/rpg-systems.html", "dist/es/rpg-systems.html"):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    text = text.replace("RPG Systems — Pedro Pinczura", "RPG Project — Pedro Pinczura")
+    text = text.replace("RPG Systems — Unity/C# technical design case study", "RPG Project — Unity/C# technical design case study")
+    text = text.replace("RPG Systems — caso de estudio de Technical Design", "RPG Project — caso de estudio de Technical Design")
+    text = text.replace('<h1>RPG<br><span class="blue">SYSTEMS.</span></h1>', '<h1>RPG<br><span class="blue">PROJECT.</span></h1>')
+    p.write_text(text, encoding="utf-8")
+
+# Work cards.
+for path in ("dist/work.html", "dist/es/work.html"):
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    text = text.replace('<strong>RPG Systems</strong>', '<strong>RPG Project</strong>', 1)
+    p.write_text(text, encoding="utf-8")
+
+# Combat: pair each weapon configuration with the matching gameplay evidence.
+en_combat = r'''
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">01 / Combat & weapons</div><h2>ONE COMBAT FLOW.<br>DIFFERENT WEAPONS.</h2></div>
+      <p><strong>WeaponConfig</strong> keeps weapon behaviour data-driven while Fighter reuses one combat flow for melee and ranged attacks. The same configuration surface controls equipped visuals, animation overrides, damage, range, handedness and optional projectile behaviour.</p>
+    </div>
+
+    <div class="rpg-weapon-stack">
+      <article class="rpg-weapon-pair">
+        <figure class="rpg-media rpg-inspector-card">
+          <img src="public/media/rpg/weapon-config.webp" alt="Unity Inspector showing the Sword WeaponConfig data" loading="lazy" decoding="async">
+          <figcaption><span>SWORD / WEAPONCONFIG</span><strong>Melee configuration: equipped prefab, animation override, damage and range</strong></figcaption>
+        </figure>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Sword combat gameplay showing melee attacks, damage and enemy defeat">
+            <source src="public/media/rpg/sword-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>MELEE GAMEPLAY</span><strong>Sword combat → attack timing → damage → enemy defeat</strong></figcaption>
+        </figure>
+      </article>
+
+      <article class="rpg-weapon-pair rpg-weapon-pair-ranged">
+        <div class="rpg-config-card">
+          <div class="rpg-config-top"><span class="ey">BOW / RANGED VARIANT</span><strong>WeaponConfig</strong></div>
+          <div class="rpg-config-rows">
+            <div><span>Equip slot</span><b>Weapon</b></div>
+            <div><span>Attack model</span><b>Projectile-enabled</b></div>
+            <div><span>Visual prefab</span><b>Configurable</b></div>
+            <div><span>Animator override</span><b>Configurable</b></div>
+            <div><span>Damage / range</span><b>Data-driven</b></div>
+          </div>
+          <p>Ranged weapons use the same configuration model as melee weapons; enabling a projectile changes how the hit is delivered without requiring a separate combat system.</p>
+        </div>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Ranged combat gameplay showing bow projectiles, damage and enemy defeat">
+            <source src="public/media/rpg/ranged-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>RANGED GAMEPLAY</span><strong>Bow → projectile → impact → damage → XP</strong></figcaption>
+        </figure>
+      </article>
+    </div>
+  </div>
+</section>
+'''
+
+es_combat = r'''
+<section class="rpg-section">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">01 / Combate y armas</div><h2>UN MISMO FLUJO.<br>DISTINTAS ARMAS.</h2></div>
+      <p><strong>WeaponConfig</strong> mantiene el comportamiento de las armas data-driven mientras Fighter reutiliza un único flujo de combate para ataques melee y ranged. La misma configuración controla visual, Animator Override, daño, rango, mano y el proyectil opcional.</p>
+    </div>
+
+    <div class="rpg-weapon-stack">
+      <article class="rpg-weapon-pair">
+        <figure class="rpg-media rpg-inspector-card">
+          <img src="../public/media/rpg/weapon-config.webp" alt="Inspector de Unity mostrando los datos de Sword WeaponConfig" loading="lazy" decoding="async">
+          <figcaption><span>SWORD / WEAPONCONFIG</span><strong>Configuración melee: prefab equipado, animaciones, daño y rango</strong></figcaption>
+        </figure>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Gameplay de combate con espada mostrando ataques melee, daño y derrota del enemigo">
+            <source src="../public/media/rpg/sword-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>GAMEPLAY MELEE</span><strong>Espada → timing de ataque → daño → derrota del enemigo</strong></figcaption>
+        </figure>
+      </article>
+
+      <article class="rpg-weapon-pair rpg-weapon-pair-ranged">
+        <div class="rpg-config-card">
+          <div class="rpg-config-top"><span class="ey">BOW / VARIANTE RANGED</span><strong>WeaponConfig</strong></div>
+          <div class="rpg-config-rows">
+            <div><span>Slot</span><b>Weapon</b></div>
+            <div><span>Modelo de ataque</span><b>Con proyectil</b></div>
+            <div><span>Prefab visual</span><b>Configurable</b></div>
+            <div><span>Animator Override</span><b>Configurable</b></div>
+            <div><span>Daño / rango</span><b>Data-driven</b></div>
+          </div>
+          <p>Las armas ranged utilizan el mismo modelo de configuración que las melee; activar un proyectil cambia cómo se entrega el impacto sin necesitar otro sistema de combate.</p>
+        </div>
+        <figure class="rpg-media rpg-video-card">
+          <video autoplay muted loop playsinline preload="metadata" aria-label="Gameplay de combate ranged con arco, proyectiles, daño y derrota del enemigo">
+            <source src="../public/media/rpg/ranged-combat.mp4" type="video/mp4">
+          </video>
+          <figcaption><span>GAMEPLAY RANGED</span><strong>Arco → proyectil → impacto → daño → XP</strong></figcaption>
+        </figure>
+      </article>
+    </div>
+  </div>
+</section>
+'''
+
+replace_section("dist/rpg-systems.html", '<div class="ey">01 / Combat & weapons</div>', en_combat)
+replace_section("dist/es/rpg-systems.html", '<div class="ey">01 / Combate y armas</div>', es_combat)
+
+# Inventory copy reflects the richer capture: weapon equip + potion/action bar.
+for path, old, new in [
+    ("dist/rpg-systems.html",
+     '<figcaption><span>INTERACTION</span><strong>Drag & drop between inventory and equipment</strong></figcaption>',
+     '<figcaption><span>INTERACTION</span><strong>Equip a weapon → move a potion into the action bar</strong></figcaption>'),
+    ("dist/es/rpg-systems.html",
+     '<figcaption><span>INTERACCIÓN</span><strong>Drag & drop entre inventario y equipamiento</strong></figcaption>',
+     '<figcaption><span>INTERACCIÓN</span><strong>Equipar un arma → mover una poción a la action bar</strong></figcaption>'),
+]:
+    replace_once(path, old, new)
+
+# Final gallery. Reuses the strongest project evidence and opens it at full available resolution.
+en_gallery = r'''
+<section class="rpg-gallery">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">07 / Gallery</div><h2>PROJECT<br><span class="blue">GALLERY.</span></h2></div>
+      <p>A final visual pass through the playable world and the systems behind it. Click any image to inspect it without the layout crop.</p>
+    </div>
+    <div class="rpg-gallery-grid">
+      <figure class="rpg-gallery-item rpg-gallery-wide">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/hero.webp" data-alt="RPG Project key art" data-caption="RPG Project — low-poly fantasy world key art."><img src="public/media/rpg/hero.webp" alt="RPG Project key art" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>RPG Project — world key art.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/inventory-equipment.webp" data-alt="RPG inventory and equipment UI" data-caption="Inventory, equipment and action bar inside the playable scene."><img src="public/media/rpg/inventory-equipment.webp" alt="RPG inventory and equipment UI" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Inventory, equipment & action bar.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/enemy-ai-path.webp" data-alt="Enemy AI patrol paths in Unity" data-caption="Scene-authored patrol routes and encounter placement."><img src="public/media/rpg/enemy-ai-path.webp" alt="Enemy AI patrol paths in Unity" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Enemy patrol authoring in Scene View.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item rpg-gallery-technical">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/weapon-config.webp" data-alt="Sword WeaponConfig inspector" data-caption="Sword WeaponConfig — data-driven weapon setup."><img src="public/media/rpg/weapon-config.webp" alt="Sword WeaponConfig inspector" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Sword WeaponConfig.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item rpg-gallery-technical">
+        <button class="rpg-galleryopen" data-src="public/media/rpg/helmet-modifier.webp" data-alt="Healthy Helmet stat modifier inspector" data-caption="Healthy Helmet — additive Max Health modifier."><img src="public/media/rpg/helmet-modifier.webp" alt="Healthy Helmet stat modifier inspector" loading="lazy" decoding="async"><span>VIEW ↗</span></button>
+        <figcaption>Equipment stat modifier.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+<dialog class="rpg-lightbox" aria-label="RPG Project gallery image">
+  <button class="rpg-lightbox-close" type="button" aria-label="Close gallery">×</button>
+  <img alt="">
+  <p></p>
+</dialog>
+'''
+
+es_gallery = r'''
+<section class="rpg-gallery">
+  <div class="c">
+    <div class="rpg-sectionhead">
+      <div><div class="ey">07 / Galería</div><h2>GALERÍA DEL<br><span class="blue">PROYECTO.</span></h2></div>
+      <p>Un último recorrido visual por el mundo jugable y los sistemas que lo sostienen. Pulsa cualquier imagen para verla sin el recorte del layout.</p>
+    </div>
+    <div class="rpg-gallery-grid">
+      <figure class="rpg-gallery-item rpg-gallery-wide">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/hero.webp" data-alt="Key art de RPG Project" data-caption="RPG Project — key art del mundo fantástico low-poly."><img src="../public/media/rpg/hero.webp" alt="Key art de RPG Project" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>RPG Project — key art del mundo.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/inventory-equipment.webp" data-alt="UI de inventario y equipamiento RPG" data-caption="Inventario, equipamiento y action bar dentro de la escena jugable."><img src="../public/media/rpg/inventory-equipment.webp" alt="UI de inventario y equipamiento RPG" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Inventario, equipamiento y action bar.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/enemy-ai-path.webp" data-alt="Rutas de patrulla de IA enemiga en Unity" data-caption="Rutas de patrulla y colocación de encuentros configuradas en escena."><img src="../public/media/rpg/enemy-ai-path.webp" alt="Rutas de patrulla de IA enemiga en Unity" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Authoring de patrullas en Scene View.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item rpg-gallery-technical">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/weapon-config.webp" data-alt="Inspector de Sword WeaponConfig" data-caption="Sword WeaponConfig — configuración data-driven del arma."><img src="../public/media/rpg/weapon-config.webp" alt="Inspector de Sword WeaponConfig" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Sword WeaponConfig.</figcaption>
+      </figure>
+      <figure class="rpg-gallery-item rpg-gallery-technical">
+        <button class="rpg-galleryopen" data-src="../public/media/rpg/helmet-modifier.webp" data-alt="Inspector del modificador Healthy Helmet" data-caption="Healthy Helmet — modificador aditivo de Max Health."><img src="../public/media/rpg/helmet-modifier.webp" alt="Inspector del modificador Healthy Helmet" loading="lazy" decoding="async"><span>VER ↗</span></button>
+        <figcaption>Modificador de stats de equipamiento.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+<dialog class="rpg-lightbox" aria-label="Imagen de la galería de RPG Project">
+  <button class="rpg-lightbox-close" type="button" aria-label="Cerrar galería">×</button>
+  <img alt="">
+  <p></p>
+</dialog>
+'''
+
+for path, gallery in [("dist/rpg-systems.html", en_gallery), ("dist/es/rpg-systems.html", es_gallery)]:
+    p = Path(path)
+    text = p.read_text(encoding="utf-8")
+    nav = '<nav class="credit-projectnav">'
+    if nav not in text:
+        raise SystemExit(f"Project nav not found in {path}")
+    text = text.replace(nav, gallery + '\n' + nav, 1)
+    # Gallery behaviour; page-local and intentionally tiny.
+    script = r'''<script>
+(()=>{const d=document.querySelector('.rpg-lightbox');if(!d)return;
+const img=d.querySelector('img'),cap=d.querySelector('p'),close=d.querySelector('.rpg-lightbox-close');
+document.querySelectorAll('.rpg-galleryopen').forEach(b=>b.addEventListener('click',()=>{img.src=b.dataset.src;img.alt=b.dataset.alt||'';cap.textContent=b.dataset.caption||'';d.showModal()}));
+close.addEventListener('click',()=>d.close());
+d.addEventListener('click',e=>{if(e.target===d)d.close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&d.open)d.close()});
+})();</script>'''
+    text = text.replace('</main>', script + '</main>', 1)
+    p.write_text(text, encoding="utf-8")
+
+# Metadata title/labels.
+for path in ("dist/rpg-systems.html","dist/es/rpg-systems.html"):
+    p=Path(path)
+    text=p.read_text(encoding="utf-8")
+    text=text.replace('content="RPG Systems — Pedro Pinczura"', 'content="RPG Project — Pedro Pinczura"')
+    p.write_text(text, encoding="utf-8")
+
+# V2 styling appended after V1 so the old case study stays a safe baseline.
+css = Path("dist/style.css")
+css.write_text(css.read_text(encoding="utf-8") + r'''
+
+/* ===== RPG PROJECT CASE STUDY V2 ===== */
+.rpg-weapon-stack{display:grid;gap:22px}
+.rpg-weapon-pair{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);gap:16px;align-items:stretch}
+.rpg-weapon-pair .rpg-video-card{min-height:390px}
+.rpg-weapon-pair .rpg-inspector-card img{max-height:520px;object-fit:contain}
+.rpg-config-card{border:1px solid var(--l);padding:26px;background:radial-gradient(circle at 85% 8%,rgba(47,128,255,.13),transparent 32%),#10151d;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.rpg-config-top{display:grid;gap:8px;padding-bottom:20px;border-bottom:1px solid var(--l)}
+.rpg-config-top strong{font-size:clamp(28px,3vw,44px);letter-spacing:-.05em}
+.rpg-config-rows{display:grid;margin-top:16px;border-top:1px solid rgba(255,255,255,.06)}
+.rpg-config-rows>div{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}
+.rpg-config-rows span{color:#7f8b9a;font:10px ui-monospace;letter-spacing:.06em}
+.rpg-config-rows b{font-weight:600;color:#d7dee8;text-align:right}
+.rpg-config-card>p{color:#9ea9b7;font-size:13px;margin:20px 0 0}
+
+.rpg-gallery{padding:115px 0 130px;border-top:1px solid var(--l)}
+.rpg-gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.rpg-gallery-item{margin:0;border:1px solid var(--l);background:#0b1016;overflow:hidden;min-width:0}
+.rpg-gallery-wide{grid-column:1/-1}
+.rpg-galleryopen{position:relative;display:block;width:100%;padding:0;border:0;background:#080b0f;color:#fff;cursor:zoom-in;overflow:hidden}
+.rpg-galleryopen img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;transition:transform .45s cubic-bezier(.2,.75,.2,1)}
+.rpg-gallery-wide .rpg-galleryopen img{aspect-ratio:2.05/1}
+.rpg-gallery-technical .rpg-galleryopen{background:#24282d}
+.rpg-gallery-technical .rpg-galleryopen img{object-fit:contain;padding:18px;aspect-ratio:4/3}
+.rpg-galleryopen>span{position:absolute;right:14px;bottom:14px;padding:7px 9px;border:1px solid rgba(255,255,255,.22);background:rgba(5,8,12,.76);font:10px ui-monospace;opacity:0;transform:translateY(4px);transition:.22s}
+.rpg-galleryopen:hover img{transform:scale(1.014)}
+.rpg-galleryopen:hover>span,.rpg-galleryopen:focus-visible>span{opacity:1;transform:none}
+.rpg-gallery-item figcaption{padding:12px 14px 14px;border-top:1px solid var(--l);color:#8e99a8;font-size:12px}
+
+.rpg-lightbox{width:min(94vw,1500px);max-width:none;max-height:94dvh;padding:0;border:1px solid rgba(255,255,255,.16);background:#070a0e;color:#fff;box-shadow:0 34px 110px rgba(0,0,0,.75)}
+.rpg-lightbox::backdrop{background:rgba(2,4,7,.9);backdrop-filter:blur(8px)}
+.rpg-lightbox img{display:block;width:100%;max-height:84dvh;object-fit:contain;background:#05070a}
+.rpg-lightbox p{margin:0;padding:12px 16px 14px;color:#9ca7b6;border-top:1px solid var(--l)}
+.rpg-lightbox-close{position:absolute;right:12px;top:12px;z-index:2;width:40px;height:40px;border:1px solid rgba(255,255,255,.24);background:rgba(5,8,12,.82);color:#fff;font-size:25px;cursor:pointer}
+
+@media(max-width:900px){
+  .rpg-weapon-pair{grid-template-columns:1fr}
+  .rpg-weapon-pair .rpg-inspector-card img{max-height:460px}
+}
+@media(max-width:620px){
+  .rpg-gallery-grid{grid-template-columns:1fr}
+  .rpg-gallery-wide{grid-column:auto}
+  .rpg-gallery-wide .rpg-galleryopen img{aspect-ratio:16/9}
+  .rpg-config-card{padding:22px}
+  .rpg-weapon-pair .rpg-video-card{min-height:0}
+}
+''', encoding="utf-8")
+PY
