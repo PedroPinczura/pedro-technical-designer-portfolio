@@ -4829,3 +4829,112 @@ apply_personal_cover(
     "Portada de Proyectos personales que combina fantasía RPG y aventura inspirada en PAPERly"
 )
 PY
+
+
+# ===== UMAMI ANALYTICS / PER-BUTTON CLICK TRACKING =====
+# Each anchor and button gets its own stable event name within its page.
+python3 - <<'PY'
+from collections import Counter
+from html import escape, unescape
+from pathlib import Path
+from urllib.parse import urlsplit
+import posixpath
+import re
+
+site_root = Path("dist")
+tracking_script = '<script defer src="https://cloud.umami.is/script.js" data-website-id="698ecae7-c025-49f5-8974-c6c4937bc288"></script>'
+totals = Counter()
+destinations = Counter()
+
+def slug(value):
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "link"
+
+def read_attribute(tag, key):
+    match = re.search(r'\b' + re.escape(key) + r'\s*=\s*(["\'])(.*?)\1', tag, flags=re.I | re.S)
+    return unescape(match.group(2)) if match else ""
+
+def destination_of(tag, kind, fallback):
+    href = read_attribute(tag, "href")
+    if kind == "button":
+        return slug(read_attribute(tag, "id") or read_attribute(tag, "aria-label") or fallback or "button")
+    url = urlsplit(href)
+    host = (url.hostname or "").lower()
+    filename = posixpath.basename(url.path.rstrip("/")).lower()
+    if url.scheme == "mailto":
+        return "email"
+    if url.scheme == "tel":
+        return "phone"
+    if host in ("linkedin.com", "www.linkedin.com"):
+        return "linkedin"
+    if filename == "pedro-pinczura-cv.pdf":
+        return "cv"
+    if filename == "work.html" and url.fragment.lower() == "personal":
+        return "personal-projects"
+    if filename:
+        return slug(Path(filename).stem)
+    if url.fragment:
+        return "section-" + slug(url.fragment)
+    if host:
+        return slug(host)
+    return "link"
+
+def describe(tag, content, kind):
+    if read_attribute(tag, "href").lower().startswith(("mailto:", "tel:")):
+        return "Email" if "mailto:" in tag.lower() else "Phone"
+    title = read_attribute(tag, "aria-label") or read_attribute(tag, "title")
+    if not title:
+        heading = re.search(r'<h[1-6]\b[^>]*>(.*?)</h[1-6]>', content, flags=re.I | re.S)
+        title = heading.group(1) if heading else content
+    title = re.sub(r'<[^>]*>', " ", title)
+    title = re.sub(r'\s+', ' ', unescape(title)).strip()
+    return (title[:65] or kind.title())
+
+for page in site_root.rglob("*.html"):
+    source = page.read_text(encoding="utf-8")
+    relative = page.relative_to(site_root)
+    page_name = "_".join(relative.with_suffix("").parts).lower().replace("index", "home")
+    page_name = slug(page_name)[:18]
+    language = "es" if relative.parts[0] == "es" else "en"
+    index = 0
+
+    def instrument(match):
+        tag = match.group(0)
+        kind = match.group(1).lower()
+        if "data-umami-event=" in tag.lower():
+            return tag
+        # Exclude disabled controls; they cannot generate user clicks.
+        if kind == "button" and re.search(r'\bdisabled\b', tag, flags=re.I):
+            return tag
+        after = source[match.end():]
+        closing = re.search(r'</' + kind + r'\s*>', after, flags=re.I)
+        content = after[:closing.start()] if closing else ""
+        label = describe(tag, content, kind)
+        target = destination_of(tag, kind, label)
+        ordinal = totals[page_name] + 1
+        totals[page_name] = ordinal
+        destinations[target] += 1
+        event_name = f"click_{page_name}_{target[:18]}_{ordinal:03d}"
+        if len(event_name) > 50:
+            raise SystemExit(f"Umami event exceeds 50 characters: {event_name}")
+        attributes = (
+            f' data-umami-event="{event_name}"'
+            f' data-umami-event-label="{escape(label, quote=True)}"'
+            f' data-umami-event-target="{escape(target, quote=True)}"'
+            f' data-umami-event-language="{language}"'
+        )
+        return tag[:-1] + attributes + ">"
+
+    source = re.sub(r'<(a|button)\b[^>]*>', instrument, source, flags=re.I | re.S)
+    if tracking_script not in source:
+        source, inserted = re.subn(r'</head\s*>', lambda m: tracking_script + "\n" + m.group(0),
+                                   source, count=1, flags=re.I)
+        if inserted != 1:
+            raise SystemExit(f"Could not add Umami script to {page}")
+    page.write_text(source, encoding="utf-8")
+
+for required in ("paperly", "rpg-systems", "personal-projects", "cv", "linkedin", "contact"):
+    if not destinations[required]:
+        raise SystemExit(f"No instrumented link for {required}")
+print(f"Umami: instrumented {sum(totals.values())} links/buttons on {len(totals)} pages.")
+print("Umami destinations:", dict(destinations))
+PY
